@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentDesigner } from "@/shared/hooks/useCurrentDesigner";
 
@@ -8,7 +8,6 @@ function designerUrl(d: { id: string; slug: string | null }) {
 }
 
 export function PublicLayout() {
-  const location = useLocation();
   const navigate = useNavigate();
   const { designer, allDesigners, switchDesigner } = useCurrentDesigner();
   const [switcherOpen, setSwitcherOpen] = useState(false);
@@ -25,12 +24,6 @@ export function PublicLayout() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [switcherOpen]);
-
-  const isDesignerFlow =
-    location.pathname.includes("/upload") ||
-    location.pathname.includes("/designers") ||
-    location.pathname.includes("/portfolio") ||
-    location.pathname.includes("/projects");
 
   const handleSwitchDesigner = (d: typeof designer) => {
     switchDesigner(d.id);
@@ -53,14 +46,12 @@ export function PublicLayout() {
             />
           </Link>
           <nav className="flex items-center gap-3 sm:gap-4">
-            {!isDesignerFlow && (
-              <Link
-                to="/admin"
-                className="type-label-sm text-on-surface-variant hover:text-on-surface transition-colors hidden sm:inline"
-              >
-                Admin
-              </Link>
-            )}
+            <Link
+              to="/admin"
+              className="type-label-sm text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+            >
+              Admin
+            </Link>
 
             {/* デザイナー切り替え（Proto） */}
             <div className="relative" ref={switcherRef}>
