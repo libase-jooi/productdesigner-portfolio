@@ -1,0 +1,175 @@
+/* ═══════════════════════════════════════════════════════════════
+   PRIMITIVE TOKENS
+   Raw design values. Never reference these directly in components.
+   Always go through semantic tokens.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Color: Purple (Primary) ─────────────────────────────── */
+  --p-purple-50:  #F3F0FF;
+  --p-purple-100: #E0DBFF;
+  --p-purple-200: #C4B8FF;
+  --p-purple-300: #A694FF;
+  --p-purple-400: #8A73FF;
+  --p-purple-500: #4A3AFF;  /* primary-container */
+  --p-purple-600: #3A1FFF;
+  --p-purple-700: #2E02E9;  /* primary */
+  --p-purple-800: #2301B8;
+  --p-purple-900: #190187;
+  --p-purple-950: #0E0052;
+
+  /* ── Color: Teal (Secondary) ─────────────────────────────── */
+  --p-teal-50:  #E6F4FA;
+  --p-teal-100: #B3DFF0;
+  --p-teal-200: #80CAE5;
+  --p-teal-300: #4DB5DB;
+  --p-teal-400: #1A9FD0;
+  --p-teal-500: #00658D;  /* secondary */
+  --p-teal-600: #005577;
+  --p-teal-700: #004461;
+  --p-teal-800: #00344A;
+  --p-teal-900: #002334;
+
+  /* ── Color: Green (Tertiary / Status) ────────────────────── */
+  --p-green-50:  #E8F5EC;
+  --p-green-100: #B8E2C5;
+  --p-green-200: #88CF9E;
+  --p-green-300: #58BC77;
+  --p-green-400: #28A950;
+  --p-green-500: #00551F;  /* tertiary */
+  --p-green-600: #004A1B;
+  --p-green-700: #003F16;
+  --p-green-800: #003412;
+  --p-green-900: #00290E;
+
+  /* ── Color: Error / Destructive ──────────────────────────── */
+  --p-red-50:  #FFF0EE;
+  --p-red-100: #FFDAD6;
+  --p-red-200: #FFB4AB;
+  --p-red-300: #FF897D;
+  --p-red-400: #FF5449;
+  --p-red-500: #DE3730;
+  --p-red-600: #BA1A1A;
+  --p-red-700: #93000A;
+  --p-red-800: #690005;
+  --p-red-900: #410002;
+
+  /* ── Color: Neutral ──────────────────────────────────────── */
+  --p-neutral-0:   #FFFFFF;
+  --p-neutral-50:  #F9F8FC;
+  --p-neutral-100: #F3F2F6;
+  --p-neutral-150: #ECEBED;
+  --p-neutral-200: #E4E2E6;
+  --p-neutral-300: #C8C5CA;
+  --p-neutral-400: #ACA9AF;
+  --p-neutral-500: #918E94;
+  --p-neutral-600: #787579;
+  --p-neutral-700: #605D62;
+  --p-neutral-800: #484649;
+  --p-neutral-900: #313033;
+  --p-neutral-950: #1D1B20;
+  --p-neutral-1000: #000000;
+
+  /* ── Color: Neutral Variant (Purple-tinted neutrals) ─────── */
+  --p-nv-50:  #F5F0FA;
+  --p-nv-100: #E7E0EC;
+  --p-nv-200: #D0C9D6;
+  --p-nv-300: #B9B2BF;
+  --p-nv-400: #A39DA9;
+  --p-nv-500: #8C8793;
+  --p-nv-600: #79747E;
+  --p-nv-700: #625D66;
+  --p-nv-800: #49454E;
+  --p-nv-900: #322F35;
+  --p-nv-950: #1D1A22;
+
+  /* ── Typography: Font Families ───────────────────────────── */
+  --p-font-display: 'Manrope Variable', 'Noto Sans JP Variable', sans-serif;
+  --p-font-body:    'Manrope Variable', 'Noto Sans JP Variable', sans-serif;
+  --p-font-mono:    ui-monospace, 'SF Mono', Consolas, monospace;
+
+  /* ── Typography: Sizes ───────────────────────────────────── */
+  --p-text-xs:    0.6875rem;  /* 11px */
+  --p-text-sm:    0.75rem;    /* 12px */
+  --p-text-md:    0.875rem;   /* 14px */
+  --p-text-base:  1rem;       /* 16px */
+  --p-text-lg:    1.125rem;   /* 18px */
+  --p-text-xl:    1.375rem;   /* 22px */
+  --p-text-2xl:   1.75rem;    /* 28px */
+  --p-text-3xl:   2.25rem;    /* 36px */
+  --p-text-4xl:   3rem;       /* 48px */
+  --p-text-5xl:   3.5rem;     /* 56px */
+
+  /* ── Typography: Weights ─────────────────────────────────── */
+  --p-weight-regular:  400;
+  --p-weight-medium:   500;
+  --p-weight-semibold: 600;
+  --p-weight-bold:     700;
+  --p-weight-extrabold:800;
+
+  /* ── Typography: Line Heights ────────────────────────────── */
+  --p-leading-tight:  1.15;
+  --p-leading-snug:   1.3;
+  --p-leading-normal: 1.5;
+  --p-leading-relaxed:1.6;
+  --p-leading-loose:  1.8;
+
+  /* ── Typography: Letter Spacing ──────────────────────────── */
+  --p-tracking-tighter: -0.04em;
+  --p-tracking-tight:   -0.02em;
+  --p-tracking-normal:   0em;
+  --p-tracking-wide:     0.02em;
+  --p-tracking-wider:    0.06em;
+  --p-tracking-widest:   0.1em;
+
+  /* ── Spacing ─────────────────────────────────────────────── */
+  --p-space-0:  0px;
+  --p-space-1:  0.25rem;   /*  4px */
+  --p-space-2:  0.5rem;    /*  8px */
+  --p-space-3:  0.75rem;   /* 12px */
+  --p-space-4:  1rem;      /* 16px */
+  --p-space-5:  1.25rem;   /* 20px */
+  --p-space-6:  1.5rem;    /* 24px */
+  --p-space-8:  2rem;      /* 32px */
+  --p-space-10: 2.5rem;    /* 40px */
+  --p-space-12: 3rem;      /* 48px */
+  --p-space-16: 4rem;      /* 64px */
+  --p-space-20: 5rem;      /* 80px */
+  --p-space-24: 6rem;      /* 96px */
+  --p-space-32: 8rem;      /* 128px */
+
+  /* ── Radius ──────────────────────────────────────────────── */
+  --p-radius-none: 0px;
+  --p-radius-sm:   4px;
+  --p-radius-md:   8px;
+  --p-radius-lg:   16px;
+  --p-radius-xl:   24px;
+  --p-radius-2xl:  32px;
+  --p-radius-full: 9999px;
+
+  /* ── Elevation (Ambient Shadows) ─────────────────────────── */
+  --p-shadow-none: none;
+  --p-shadow-xs:   0px 1px 2px rgba(0, 0, 0, 0.03);
+  --p-shadow-sm:   0px 2px 8px rgba(0, 0, 0, 0.04);
+  --p-shadow-md:   0px 4px 16px rgba(0, 0, 0, 0.05);
+  --p-shadow-lg:   0px 8px 24px rgba(0, 0, 0, 0.06);
+  --p-shadow-xl:   0px 12px 32px rgba(0, 0, 0, 0.06);
+  --p-shadow-glow: 0px 0px 24px rgba(74, 58, 255, 0.15);
+
+  /* ── Blur ────────────────────────────────────────────────── */
+  --p-blur-sm:  8px;
+  --p-blur-md:  16px;
+  --p-blur-lg:  32px;
+  --p-blur-xl:  64px;
+
+  /* ── Duration ────────────────────────────────────────────── */
+  --p-duration-fast:   100ms;
+  --p-duration-normal: 200ms;
+  --p-duration-slow:   400ms;
+  --p-duration-slower: 600ms;
+
+  /* ── Easing ──────────────────────────────────────────────── */
+  --p-ease-default:    cubic-bezier(0.2, 0, 0, 1);
+  --p-ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --p-ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
+}
