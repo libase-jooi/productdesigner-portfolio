@@ -1,12 +1,14 @@
 import { createBrowserRouter } from "react-router-dom";
 import { LandingLayout } from "./layouts/LandingLayout";
 import { PublicLayout } from "./layouts/PublicLayout";
+import { SharedLayout } from "./layouts/SharedLayout";
 import { AdminLayout } from "./layouts/AdminLayout";
 import { LandingPage } from "@/features/landing/pages/LandingPage";
 import { LoginPage } from "@/features/auth/pages/LoginPage";
 import { SignupPage } from "@/features/auth/pages/SignupPage";
 import { DesignerListPage } from "@/features/designer/pages/DesignerListPage";
 import { DesignerDetailPage } from "@/features/designer/pages/DesignerDetailPage";
+import { PublicPortfolioPage } from "@/features/designer/pages/PublicPortfolioPage";
 import { ProjectDetailPage } from "@/features/project/pages/ProjectDetailPage";
 import { ProcessingPage } from "@/features/upload/pages/ProcessingPage";
 import { ReviewPage } from "@/features/upload/pages/ReviewPage";
@@ -24,7 +26,14 @@ export const router = createBrowserRouter([
   // 認証
   { path: "login", element: <LoginPage /> },
   { path: "signup", element: <SignupPage /> },
-  // ポートフォリオ（ログイン後）
+  // 公開ポートフォリオ（誰でも閲覧可能）
+  {
+    element: <SharedLayout />,
+    children: [
+      { path: "p/:slug", element: <PublicPortfolioPage /> },
+    ],
+  },
+  // ポートフォリオ編集（ログイン後）
   {
     element: <PublicLayout />,
     children: [

@@ -148,6 +148,17 @@ export function DesignerDetailPage() {
               <span className="type-label-md text-on-surface">
                 {isPublished ? "公開中" : "非公開"}
               </span>
+              {isPublished && slugValue && (
+                <a
+                  href={`/p/${slugValue}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 type-label-sm text-primary hover:text-primary/80 transition-colors"
+                >
+                  公開ページを見る
+                  <ExternalLinkIcon />
+                </a>
+              )}
             </div>
             <button
               onClick={() => setIsPublished(!isPublished)}
@@ -165,11 +176,11 @@ export function DesignerDetailPage() {
 
           {/* URL */}
           <div className="flex items-center gap-2">
-            <span className="type-body-sm text-on-surface-variant shrink-0">URL:</span>
+            <span className="type-body-sm text-on-surface-variant shrink-0">公開URL:</span>
             {editingSlug ? (
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <span className="type-body-sm text-on-surface-variant shrink-0">
-                  {window.location.origin}/portfolio/
+                  {window.location.origin}/p/
                 </span>
                 <Input
                   value={slugValue}
@@ -207,9 +218,14 @@ export function DesignerDetailPage() {
             ) : (
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 {slugValue ? (
-                  <span className="type-body-sm text-on-surface truncate">
-                    {window.location.origin}/portfolio/{slugValue}
-                  </span>
+                  <a
+                    href={`/p/${slugValue}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="type-body-sm text-primary hover:underline truncate"
+                  >
+                    {window.location.origin}/p/{slugValue}
+                  </a>
                 ) : (
                   <span className="type-body-sm text-on-surface-variant italic">
                     未設定
@@ -224,7 +240,7 @@ export function DesignerDetailPage() {
                 {slugValue && (
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/portfolio/${slugValue}`);
+                      navigator.clipboard.writeText(`${window.location.origin}/p/${slugValue}`);
                     }}
                     className="shrink-0 text-on-surface-variant hover:text-primary transition-colors"
                     title="URLをコピー"
@@ -1750,6 +1766,26 @@ function CopyIcon() {
     >
       <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
       <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+    </svg>
+  );
+}
+
+function ExternalLinkIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M15 3h6v6" />
+      <path d="M10 14 21 3" />
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
     </svg>
   );
 }
