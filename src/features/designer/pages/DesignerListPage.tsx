@@ -15,10 +15,11 @@ export function DesignerListPage() {
 
   // /dashboard にアクセスした場合、自分のポートフォリオにリダイレクト
   useEffect(() => {
-    if (!searchParams.has("upload") && designer.slug) {
-      navigate(`/portfolio/${designer.slug}`, { replace: true });
+    if (!searchParams.has("upload")) {
+      const to = designer.slug ? `/portfolio/${designer.slug}` : `/designers/${designer.id}`;
+      navigate(to, { replace: true });
     }
-  }, [designer.slug, navigate, searchParams]);
+  }, [designer.slug, designer.id, navigate, searchParams]);
 
   // URL param ?upload で自動オープン
   useEffect(() => {

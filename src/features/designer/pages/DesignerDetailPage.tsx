@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,6 @@ export function DesignerDetailPage() {
     ? getMockDesignerBySlug(slug)
     : getMockDesigner(designerId ?? "");
 
-  const navigate = useNavigate();
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [mode, setMode] = useState<PageMode>("view");
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -63,7 +62,7 @@ export function DesignerDetailPage() {
       {/* ── Breadcrumb + Edit Toggle ───────────────────── */}
       <div className="flex items-center justify-between pt-4">
         <div className="flex items-center gap-3 type-label-sm text-on-surface-variant">
-          <Link to="/dashboard" className="hover:text-primary transition-colors">
+          <Link to={data.slug ? `/portfolio/${data.slug}` : `/designers/${data.id}`} className="hover:text-primary transition-colors">
             ホーム
           </Link>
           <span>/</span>
@@ -260,7 +259,7 @@ export function DesignerDetailPage() {
                 description="ポートフォリオをアップロードすると、AIが経歴情報を自動で構造化します。"
                 action={{
                   label: "アップロードする",
-                  onClick: () => navigate("/dashboard"),
+                  onClick: () => setUploadOpen(true),
                 }}
               />
             ) : (
@@ -284,7 +283,7 @@ export function DesignerDetailPage() {
                 description="ポートフォリオをアップロードすると、AIがプロジェクト情報を自動で構造化します。"
                 action={{
                   label: "アップロードする",
-                  onClick: () => navigate("/dashboard"),
+                  onClick: () => setUploadOpen(true),
                 }}
               />
             ) : (
