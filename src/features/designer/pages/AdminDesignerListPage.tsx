@@ -63,9 +63,6 @@ export function AdminDesignerListPage() {
             AI自動入力の進捗と信頼度を一覧で管理
           </p>
         </div>
-        <Button className="gradient-primary text-on-primary rounded-2xl px-6">
-          + 新規取り込み
-        </Button>
       </div>
 
       {/* Summary Cards */}
