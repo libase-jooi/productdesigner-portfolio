@@ -25,7 +25,7 @@ const d1Projects: Project[] = [
     designerId: "d1",
     title: "クラウド会計アプリ モバイルリニューアル",
     thumbnailUrl:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1661246627162-feb0269e0c07?w=800&h=600&fit=crop",
     overview:
       "中小企業の経理担当者が外出先でも経費精算できるよう、モバイルの領収書処理フローをゼロから再設計。タスクベースのステップUIに刷新し、主要導線のCVRを大幅改善した。",
     period: "2023年4月〜9月（6ヶ月）",
@@ -86,7 +86,7 @@ const d1Projects: Project[] = [
     designerId: "d1",
     title: "HR SaaS 年末調整機能 0→1設計",
     thumbnailUrl:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1763718528755-4bca23f82ac3?w=800&h=600&fit=crop",
     overview:
       "法改正で申告項目が倍増した年末調整を、初めての従業員でも迷わず完了できる質問形式のステップUIとしてゼロから設計。人事部の運用負荷を劇的に削減した。",
     period: "2022年10月〜2023年3月（6ヶ月）",
@@ -138,7 +138,7 @@ const d1Projects: Project[] = [
     designerId: "d1",
     title: "プロダクト横断デザインシステム構築",
     thumbnailUrl:
-      "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1653647054667-c99dc7f914ef?w=800&h=600&fit=crop",
     overview:
       "5つのプロダクトで乱立していたUIパターンを統合し、42種のコアコンポーネントとセマンティックトークンで構成されるデザインシステムを構築。開発速度とUI品質を同時に向上させた。",
     period: "2023年10月〜2024年3月（6ヶ月）",
@@ -253,7 +253,7 @@ const d2Projects: Project[] = [
     designerId: "d2",
     title: "大手キャッシュレス決済アプリ UX再設計",
     thumbnailUrl:
-      "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1765226410758-9ae3d34cd791?w=800&h=600&fit=crop",
     overview:
       "MAU 3,000万超のキャッシュレス決済アプリにおいて、2年間の長期パートナーシップでUX戦略策定からUIリニューアルまでを一貫してリード。ユーザー体験の統一とブランド価値の再定義を実現した。",
     period: "2021年4月〜2023年3月（2年間）",
@@ -313,7 +313,7 @@ const d2Projects: Project[] = [
     designerId: "d2",
     title: "大手不動産 コーポレートサイト 全面リニューアル",
     thumbnailUrl:
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1648134859179-ed0c98f54519?w=800&h=600&fit=crop",
     overview:
       "5万ページ超の大規模コーポレートサイトを、ユーザー中心設計で全面リニューアル。6事業部にまたがる情報構造を抜本的に再設計し、回遊率とコンバージョンを大幅に改善した。",
     period: "2022年4月〜2023年9月（18ヶ月）",
@@ -368,7 +368,7 @@ const d2Projects: Project[] = [
     designerId: "d2",
     title: "ECアプリ 商品検索UX改善",
     thumbnailUrl:
-      "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1757301714935-c8127a21abc6?w=800&h=600&fit=crop",
     overview:
       "国内大手ECアプリの商品検索・詳細閲覧フローを改善。検索結果のフィルタリングUXとパーソナライズ表示を再設計し、購買転換率を大幅に向上させた。",
     period: "2019年6月〜12月（7ヶ月）",
@@ -462,7 +462,7 @@ const d3Projects: Project[] = [
     designerId: "d3",
     title: "オンライン診療サービス 予約UX改善",
     thumbnailUrl:
-      "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1706509511838-4b101f379ef3?w=800&h=600&fit=crop",
     overview:
       "オンライン診療サービスの予約〜診療〜決済までのエンドツーエンド体験を再設計。患者視点の「症状ベース」導線に転換し、初回利用の予約完了率を大幅に改善した。",
     period: "2024年1月〜6月（6ヶ月）",
@@ -516,7 +516,7 @@ const d3Projects: Project[] = [
     designerId: "d3",
     title: "社会人学習プラットフォーム 習慣化UX設計",
     thumbnailUrl:
-      "https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1771923082503-0a3381c46cef?w=800&h=600&fit=crop",
     overview:
       "社会人向けオンライン学習サービスで、学習継続率の低さを行動経済学のナッジ理論を応用したUXで解決。ストリーク・目標設定・ピアラーニングの3機能を0→1で設計し、3ヶ月継続率を3倍に改善した。",
     period: "2023年4月〜10月（7ヶ月）",
