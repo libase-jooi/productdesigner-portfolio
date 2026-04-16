@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 
 const STORAGE_KEY = "jooi_proto_authed";
-const PROTO_PASSWORD = "jooijooijooi-Dx4!mQ8%zR1^tK6&";
+const PROTO_PASSWORD = "jooi-Dx4!mQ8%zR1^tK6&";
 
 function isAuthed() {
   return sessionStorage.getItem(STORAGE_KEY) === "1";

@@ -10,7 +10,6 @@ import type {
   Project,
   WorkHistory,
   Confidence,
-  ReviewStatus,
 } from "@/api/schema";
 import { EmploymentType, PhaseTag } from "@/api/schema";
 
