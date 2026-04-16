@@ -35,6 +35,62 @@ export function DesignerDetailPage() {
   const [isPublished, setIsPublished] = useState(data?.publishedAt !== null);
   const [editingSlug, setEditingSlug] = useState(false);
   const [slugValue, setSlugValue] = useState(data?.slug ?? "");
+  const [workHistoryList, setWorkHistoryList] = useState<WorkHistory[]>(data?.workHistory ?? []);
+  const [projectList, setProjectList] = useState<Project[]>(data?.projects ?? []);
+
+  const addWorkHistory = () => {
+    const now = new Date().toISOString();
+    const newItem: WorkHistory = {
+      id: `wh-new-${Date.now()}`,
+      designerId: data?.id ?? "",
+      company: "",
+      role: null,
+      periodStart: null,
+      periodEnd: null,
+      isCurrent: false,
+      description: null,
+      domainTags: [],
+      employmentType: null,
+      confidence: "低",
+      reviewStatus: "未確認",
+      createdAt: now,
+      updatedAt: now,
+    };
+    setWorkHistoryList((prev) => [...prev, newItem]);
+  };
+
+  const addProject = () => {
+    const now = new Date().toISOString();
+    const newItem: Project = {
+      id: `pj-new-${Date.now()}`,
+      designerId: data?.id ?? "",
+      title: "",
+      thumbnailUrl: null,
+      overview: null,
+      period: null,
+      team: null,
+      role: null,
+      background: null,
+      issues: [],
+      approach: [],
+      keyDecisions: [],
+      outputs: null,
+      figmaUrl: null,
+      results: null,
+      metrics: [],
+      quote: null,
+      domainTags: [],
+      phaseTags: [],
+      skillTags: [],
+      confidence: "低",
+      reviewStatus: "未確認",
+      notes: null,
+      rawJson: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    setProjectList((prev) => [...prev, newItem]);
+  };
 
   if (!data) {
     return (
@@ -346,13 +402,14 @@ export function DesignerDetailPage() {
               経歴
             </h2>
 
-            {data.workHistory.map((w) => (
+            {workHistoryList.map((w) => (
               <WorkHistoryFormCard key={w.id} item={w} />
             ))}
 
             <Button
               variant="ghost"
               className="w-full rounded-2xl border-2 border-dashed border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary py-6"
+              onClick={addWorkHistory}
             >
               + 経歴を追加
             </Button>
@@ -364,13 +421,14 @@ export function DesignerDetailPage() {
               プロジェクト
             </h2>
 
-            {data.projects.map((p) => (
+            {projectList.map((p) => (
               <ProjectFormCard key={p.id} project={p} />
             ))}
 
             <Button
               variant="ghost"
               className="w-full rounded-2xl border-2 border-dashed border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary py-6"
+              onClick={addProject}
             >
               + プロジェクトを追加
             </Button>
@@ -913,7 +971,8 @@ function ConfirmRow({ label, value }: { label: string; value: string }) {
    ═══════════════════════════════════════════════════════════════ */
 
 function WorkHistoryFormCard({ item: w }: { item: WorkHistory }) {
-  const [expanded, setExpanded] = useState(false);
+  const isNew = !w.company;
+  const [expanded, setExpanded] = useState(isNew);
 
   return (
     <div className="rounded-2xl bg-surface-container-low overflow-hidden">
@@ -922,7 +981,7 @@ function WorkHistoryFormCard({ item: w }: { item: WorkHistory }) {
         className="w-full flex items-center justify-between p-6 text-left hover:bg-surface-container transition-colors"
       >
         <div className="min-w-0">
-          <h3 className="type-title-md text-on-surface">{w.company}</h3>
+          <h3 className="type-title-md text-on-surface">{w.company || "新しい経歴"}</h3>
           <p className="type-body-sm text-on-surface-variant mt-0.5">
             {w.role} — {w.employmentType ?? ""}
           </p>
@@ -1025,7 +1084,8 @@ function WorkHistoryFormCard({ item: w }: { item: WorkHistory }) {
    ═══════════════════════════════════════════════════════════════ */
 
 function ProjectFormCard({ project: p }: { project: Project }) {
-  const [expanded, setExpanded] = useState(false);
+  const isNew = !p.title;
+  const [expanded, setExpanded] = useState(isNew);
 
   return (
     <div className="rounded-2xl bg-surface-container-low overflow-hidden">
@@ -1035,7 +1095,7 @@ function ProjectFormCard({ project: p }: { project: Project }) {
       >
         <div className="min-w-0">
           <h3 className="type-title-md text-on-surface truncate">
-            {p.title}
+            {p.title || "新しいプロジェクト"}
           </h3>
           <p className="type-body-sm text-on-surface-variant mt-0.5">
             {p.period ?? "期間不明"} — {p.role ?? "役割不明"}
