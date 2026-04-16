@@ -247,46 +247,39 @@ export function DesignerDetailPage() {
             )}
           </section>
 
-          {/* ── Work History ─────────────────────────────── */}
-          <section className="space-y-6 sm:space-y-8">
-            <h2 className="type-headline-md sm:type-headline-lg text-on-surface">
-              経歴
-            </h2>
-            {data.workHistory.length === 0 ? (
-              <EmptyState
-                icon={<BriefcaseIcon />}
-                title="職務経歴がまだありません"
-                description="ポートフォリオをアップロードすると、AIが経歴情報を自動で構造化します。"
-                action={{
-                  label: "アップロードする",
-                  onClick: () => setUploadOpen(true),
-                }}
-              />
-            ) : (
-              <div className="space-y-3">
-                {data.workHistory.map((w) => (
-                  <WorkHistoryRow key={w.id} item={w} />
-                ))}
-              </div>
-            )}
-          </section>
+          {/* ── Full Empty State ──────────────────────────── */}
+          {data.workHistory.length === 0 && data.projects.length === 0 ? (
+            <EmptyState
+              icon={<UploadIcon />}
+              title="ポートフォリオがまだありません"
+              description="PDFやポートフォリオURLをアップロードすると、AIが経歴・プロジェクト情報を自動で構造化します。"
+              action={{
+                label: "アップロードする",
+                onClick: () => setUploadOpen(true),
+              }}
+            />
+          ) : (
+            <>
+              {/* ── Work History ─────────────────────────────── */}
+              <section className="space-y-6 sm:space-y-8">
+                <h2 className="type-headline-md sm:type-headline-lg text-on-surface">
+                  経歴
+                </h2>
+                <div className="space-y-3">
+                  {data.workHistory.map((w) => (
+                    <WorkHistoryRow key={w.id} item={w} />
+                  ))}
+                </div>
+              </section>
 
-          {/* ── Projects ─────────────────────────────────── */}
-          <section className="space-y-6 sm:space-y-10">
-            <h2 className="type-headline-md sm:type-headline-lg text-on-surface">
-              プロジェクト
-            </h2>
-            {data.projects.length === 0 ? (
-              <EmptyState
-                icon={<FolderIcon />}
-                title="プロジェクトがまだありません"
-                description="ポートフォリオをアップロードすると、AIがプロジェクト情報を自動で構造化します。"
-                action={{
-                  label: "アップロードする",
-                  onClick: () => setUploadOpen(true),
-                }}
-              />
-            ) : (
+              {/* ── Projects ─────────────────────────────────── */}
+              <section className="space-y-6 sm:space-y-10">
+                <h2 className="type-headline-md sm:type-headline-lg text-on-surface">
+                  プロジェクト
+                </h2>
+                {data.projects.length === 0 ? (
+                  <p className="type-body-md text-on-surface-variant">プロジェクトはまだありません</p>
+                ) : (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
                 {data.projects.map((p, i) => (
                   <ProjectCard
@@ -300,31 +293,33 @@ export function DesignerDetailPage() {
             )}
           </section>
 
-          {/* ── Project Detail Modal ─────────────────────── */}
-          <Dialog
-            open={selectedProject !== null}
-            onOpenChange={(open) => {
-              if (!open) setSelectedProject(null);
-            }}
-          >
-            {selectedProject && (
-              <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col p-0">
-                <DialogHeader className="shrink-0 p-4 sm:p-6 pb-0 sm:pb-0 pr-12">
-                  <DialogTitle className="type-headline-sm sm:type-headline-lg text-on-surface">
-                    {selectedProject.title}
-                  </DialogTitle>
-                  {selectedProject.overview && (
-                    <DialogDescription className="type-body-sm sm:type-body-md text-on-surface-variant">
-                      {selectedProject.overview}
-                    </DialogDescription>
-                  )}
-                </DialogHeader>
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4">
-                  <ProjectModalBody project={selectedProject} />
-                </div>
-              </DialogContent>
-            )}
-          </Dialog>
+              {/* ── Project Detail Modal ─────────────────────── */}
+              <Dialog
+                open={selectedProject !== null}
+                onOpenChange={(open) => {
+                  if (!open) setSelectedProject(null);
+                }}
+              >
+                {selectedProject && (
+                  <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col p-0">
+                    <DialogHeader className="shrink-0 p-4 sm:p-6 pb-0 sm:pb-0 pr-12">
+                      <DialogTitle className="type-headline-sm sm:type-headline-lg text-on-surface">
+                        {selectedProject.title}
+                      </DialogTitle>
+                      {selectedProject.overview && (
+                        <DialogDescription className="type-body-sm sm:type-body-md text-on-surface-variant">
+                          {selectedProject.overview}
+                        </DialogDescription>
+                      )}
+                    </DialogHeader>
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4">
+                      <ProjectModalBody project={selectedProject} />
+                    </div>
+                  </DialogContent>
+                )}
+              </Dialog>
+            </>
+          )}
         </>
       )}
 
@@ -1666,25 +1661,6 @@ function UserIcon() {
   );
 }
 
-function BriefcaseIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-      <rect width="20" height="14" x="2" y="6" rx="2" />
-    </svg>
-  );
-}
-
 function UploadIcon() {
   return (
     <svg
@@ -1724,20 +1700,3 @@ function CopyIcon() {
   );
 }
 
-function FolderIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
-    </svg>
-  );
-}
