@@ -27,7 +27,7 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
       {action && (
         <Button
           onClick={action.onClick}
-          className="mt-6 gradient-primary text-on-primary rounded-2xl px-6"
+          className="mt-6 gradient-primary text-white rounded-2xl px-6"
         >
           {action.label}
         </Button>
