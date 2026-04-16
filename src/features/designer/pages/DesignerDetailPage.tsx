@@ -335,6 +335,7 @@ export function DesignerDetailPage() {
                 defaultValue={data.profileImageUrl}
                 label="プロフィール画像"
                 aspectRatio="1/1"
+                maxWidth="120px"
               />
             </div>
           </section>
@@ -726,10 +727,12 @@ function ImageField({
   defaultValue,
   label,
   aspectRatio = "16/9",
+  maxWidth,
 }: {
   defaultValue: string | null;
   label: string;
   aspectRatio?: string;
+  maxWidth?: string;
 }) {
   const [url, setUrl] = useState(defaultValue ?? "");
   const [editing, setEditing] = useState(false);
@@ -760,7 +763,7 @@ function ImageField({
             setEditing(true);
           }}
           className="w-full rounded-xl border-2 border-dashed border-outline-variant hover:border-primary transition-colors p-8 flex flex-col items-center gap-2 text-on-surface-variant hover:text-primary"
-          style={{ aspectRatio }}
+          style={{ aspectRatio, maxWidth }}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -796,7 +799,7 @@ function ImageField({
             className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
           />
           {tempUrl && (
-            <div className="rounded-xl overflow-hidden bg-surface-container" style={{ aspectRatio }}>
+            <div className="rounded-xl overflow-hidden bg-surface-container" style={{ aspectRatio, maxWidth }}>
               <img
                 src={tempUrl}
                 alt=""
@@ -826,7 +829,7 @@ function ImageField({
           </div>
         </div>
       ) : (
-        <div className="group relative rounded-xl overflow-hidden bg-surface-container" style={{ aspectRatio }}>
+        <div className="group relative rounded-xl overflow-hidden bg-surface-container" style={{ aspectRatio, maxWidth }}>
           <img
             src={url}
             alt=""
