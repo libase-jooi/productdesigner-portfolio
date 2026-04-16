@@ -117,9 +117,11 @@ export function ReviewPage() {
         <h2 className="type-headline-sm text-on-surface">
           プロジェクト ({data.projects.length})
         </h2>
-        {data.projects.map((p) => (
-          <ProjectCard key={p.id} project={p} />
-        ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {data.projects.map((p) => (
+            <ProjectCard key={p.id} project={p} />
+          ))}
+        </div>
       </section>
 
       {/* ── Work History ── */}

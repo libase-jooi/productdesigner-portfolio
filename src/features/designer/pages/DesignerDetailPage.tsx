@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,37 +59,28 @@ export function DesignerDetailPage() {
 
   return (
     <div className="space-y-12 sm:space-y-20 pb-24 sm:pb-28">
-      {/* ── Breadcrumb + Edit Toggle ───────────────────── */}
-      <div className="flex items-center justify-between pt-4">
-        <div className="flex items-center gap-3 type-label-sm text-on-surface-variant">
-          <Link to={data.slug ? `/portfolio/${data.slug}` : `/designers/${data.id}`} className="hover:text-primary transition-colors">
-            ホーム
-          </Link>
-          <span>/</span>
-          <span className="text-on-surface">{data.name}</span>
+      {/* ── Edit Toggle ─────────────────────────────────── */}
+      {mode === "view" && (
+        <div className="flex items-center justify-end gap-2 pt-4">
+          <Button
+            size="sm"
+            onClick={() => setUploadOpen(true)}
+            className="rounded-lg gradient-primary text-white border-none"
+          >
+            <UploadIcon />
+            更新する
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setMode("edit")}
+            className="rounded-lg"
+          >
+            <PencilIcon />
+            編集する
+          </Button>
         </div>
-        {mode === "view" && (
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              onClick={() => setUploadOpen(true)}
-              className="rounded-lg gradient-primary text-white border-none"
-            >
-              <UploadIcon />
-              更新する
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setMode("edit")}
-              className="rounded-lg"
-            >
-              <PencilIcon />
-              編集する
-            </Button>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* ── Publish Status & URL ────────────────────────── */}
       {mode === "view" && (
