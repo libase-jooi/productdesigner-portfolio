@@ -836,14 +836,15 @@ function ImageField({
             className="w-full h-full object-cover"
           />
           {/* Overlay with actions */}
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
             <button
               type="button"
               onClick={() => {
                 setTempUrl(url);
                 setEditing(true);
               }}
-              className="h-10 px-4 rounded-lg bg-white/90 text-on-surface type-label-md flex items-center gap-2 hover:bg-white transition-colors"
+              className="size-9 rounded-full bg-white/90 text-on-surface flex items-center justify-center hover:bg-white transition-colors"
+              title="変更"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -859,12 +860,12 @@ function ImageField({
                 <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
                 <path d="m15 5 4 4" />
               </svg>
-              変更
             </button>
             <button
               type="button"
               onClick={handleDelete}
-              className="h-10 px-4 rounded-lg bg-error/90 text-white type-label-md flex items-center gap-2 hover:bg-error transition-colors"
+              className="size-9 rounded-full bg-error/90 text-white flex items-center justify-center hover:bg-error transition-colors"
+              title="削除"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -881,7 +882,6 @@ function ImageField({
                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
               </svg>
-              削除
             </button>
           </div>
         </div>

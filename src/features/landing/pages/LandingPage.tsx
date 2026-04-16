@@ -26,6 +26,22 @@ const faqs = [
 export function LandingPage() {
   return (
     <div>
+      {/* Prototype Notice */}
+      <div className="bg-inverse-surface text-inverse-on-surface py-3 px-4 text-center">
+        <p className="type-label-md">
+          このページは{" "}
+          <a
+            href="https://jooi-design.io/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:opacity-80"
+          >
+            jooi-design.io
+          </a>{" "}
+          のプロトタイプ動線として設置しています。実際のサービスは上記リンクをご覧ください。
+        </p>
+      </div>
+
       {/* Hero */}
       <section className="relative overflow-hidden gradient-primary">
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 pt-16 sm:pt-28 pb-16 sm:pb-24 text-center">
