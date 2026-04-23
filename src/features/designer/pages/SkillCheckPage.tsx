@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { getMockDesigner } from "@/api/mock";
-import type { SkillScores, SubSkillScores } from "@/api/schema";
+import type { SkillScores } from "@/api/schema";
 
 /* ═══════════════════════════════════════════════════════════════
    Sub-skill definitions with level descriptions

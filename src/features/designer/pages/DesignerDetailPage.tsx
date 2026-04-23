@@ -29,9 +29,6 @@ export function DesignerDetailPage() {
     ? getMockDesignerBySlug(slug)
     : getMockDesigner(designerId ?? "");
 
-  const [selectedProjectIndex, setSelectedProjectIndex] = useState<number | null>(null);
-  const selectedProject =
-    selectedProjectIndex !== null ? projectList[selectedProjectIndex] ?? null : null;
   const [mode, setMode] = useState<PageMode>("view");
   const [uploadOpen, setUploadOpen] = useState(false);
   const [isPublished, setIsPublished] = useState(data?.publishedAt !== null);
@@ -39,6 +36,9 @@ export function DesignerDetailPage() {
   const [slugValue, setSlugValue] = useState(data?.slug ?? "");
   const [workHistoryList, setWorkHistoryList] = useState<WorkHistory[]>(data?.workHistory ?? []);
   const [projectList, setProjectList] = useState<Project[]>(data?.projects ?? []);
+  const [selectedProjectIndex, setSelectedProjectIndex] = useState<number | null>(null);
+  const selectedProject =
+    selectedProjectIndex !== null ? projectList[selectedProjectIndex] ?? null : null;
 
   const addWorkHistory = () => {
     const now = new Date().toISOString();
