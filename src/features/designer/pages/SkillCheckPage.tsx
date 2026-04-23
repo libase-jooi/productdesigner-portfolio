@@ -475,7 +475,7 @@ export function SkillCheckPage() {
                         <span
                           className={`shrink-0 type-label-md mt-0.5 rounded-md px-2 py-0.5 ${
                             selected
-                              ? "bg-primary text-on-primary"
+                              ? "bg-primary text-white"
                               : "bg-surface-container-high text-on-surface-variant"
                           }`}
                         >
@@ -504,7 +504,7 @@ export function SkillCheckPage() {
         <Button
           onClick={handleSave}
           disabled={!allAnswered}
-          className="w-full rounded-full bg-primary text-on-primary hover:bg-primary/90 disabled:opacity-50 type-label-lg py-3"
+          className="w-full rounded-full bg-primary text-white hover:bg-primary/90 disabled:opacity-50 type-label-lg py-3"
         >
           保存する
         </Button>

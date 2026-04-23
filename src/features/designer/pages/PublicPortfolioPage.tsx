@@ -910,62 +910,58 @@ function SkillRadarChart({ scores, subSkillScores }: { scores: SkillScores; subS
 }
 
 function SkillDetailList({ scores, subSkillScores }: { scores: SkillScores; subSkillScores?: SubSkillScores | null }) {
-  const [expandedKey, setExpandedKey] = useState<keyof SkillScores | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <div className="flex-1 space-y-2 w-full">
-      {SKILL_AXES.map((axis) => {
-        const isExpanded = expandedKey === axis.key;
-        return (
-          <div
-            key={axis.key}
-            className={`rounded-xl border transition-colors ${
-              isExpanded
-                ? "border-primary/30 bg-surface-container"
-                : "border-outline-variant bg-surface hover:bg-surface-container-low"
-            }`}
-          >
-            <button
-              type="button"
-              onClick={() => setExpandedKey(isExpanded ? null : axis.key)}
-              className="flex items-center gap-2 w-full px-4 py-3"
-            >
-              <span className="type-label-md text-on-surface shrink-0 w-28 sm:w-40 text-left">
-                {axis.label}
-              </span>
-              <div className="flex-1 flex items-center gap-1">
-                {Array.from({ length: 5 }, (_, i) => (
-                  <div
-                    key={i}
-                    className={`h-2 flex-1 rounded-full ${
-                      i < scores[axis.key]
-                        ? "bg-primary"
-                        : "bg-surface-container-high"
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="type-label-md text-primary font-semibold w-6 text-right">
-                {scores[axis.key]}
-              </span>
-              <span
-                className={`type-body-sm text-on-surface-variant transition-transform ${
-                  isExpanded ? "rotate-180" : ""
+      {SKILL_AXES.map((axis) => (
+        <div
+          key={axis.key}
+          className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface"
+        >
+          <span className="type-label-md text-on-surface shrink-0 w-28 sm:w-40 text-left">
+            {axis.label}
+          </span>
+          <div className="flex-1 flex items-center gap-1">
+            {Array.from({ length: 5 }, (_, i) => (
+              <div
+                key={i}
+                className={`h-2 flex-1 rounded-full ${
+                  i < scores[axis.key]
+                    ? "bg-primary"
+                    : "bg-surface-container-high"
                 }`}
-              >
-                ▼
-              </span>
-            </button>
+              />
+            ))}
+          </div>
+          <span className="type-label-md text-primary font-semibold w-6 text-right">
+            {scores[axis.key]}
+          </span>
+        </div>
+      ))}
 
-            {isExpanded && (
-              <div className="px-4 pb-4 pt-1 space-y-1.5 border-t border-outline-variant/50">
+      <button
+        type="button"
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center justify-center gap-1.5 w-full py-2 type-label-md text-on-surface-variant hover:text-on-surface transition-colors"
+      >
+        <span>{expanded ? "詳細を閉じる" : "詳細を見る"}</span>
+        <span className={`transition-transform ${expanded ? "rotate-180" : ""}`}>▼</span>
+      </button>
+
+      {expanded && (
+        <div className="space-y-4 pt-2">
+          {SKILL_AXES.map((axis) => (
+            <div key={axis.key} className="space-y-1.5">
+              <h3 className="type-label-md text-on-surface font-semibold px-1">{axis.label}</h3>
+              <div className="rounded-xl border border-outline-variant/50 bg-surface-container divide-y divide-outline-variant/30">
                 {axis.subSkills.map((sub) => {
                   const level = subSkillScores?.[sub.key] ?? 0;
                   const levelDesc = level > 0 ? sub.levels[level - 1] : null;
                   return (
                     <div
                       key={sub.key}
-                      className="flex items-start gap-2 py-1"
+                      className="flex items-start gap-2 px-4 py-2.5"
                     >
                       <span className="h-1.5 w-1.5 rounded-full bg-primary/50 shrink-0 mt-1.5" />
                       <div>
@@ -987,10 +983,10 @@ function SkillDetailList({ scores, subSkillScores }: { scores: SkillScores; subS
                   );
                 })}
               </div>
-            )}
-          </div>
-        );
-      })}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
