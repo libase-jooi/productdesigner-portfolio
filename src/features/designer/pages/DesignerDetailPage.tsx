@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { UploadDialog } from "@/features/upload/components/UploadDialog";
+import { SkillChatPanel, SkillChatToggle } from "@/features/designer/components/SkillChatPanel";
 import { getMockDesigner, getMockDesignerBySlug } from "@/api/mock";
 import type { Project, WorkHistory, SocialLinks, SkillScores, SubSkillScores } from "@/api/schema";
 import { EmploymentType, PhaseTag, AvailabilityStatus } from "@/api/schema";
@@ -37,6 +38,7 @@ export function DesignerDetailPage() {
   const [workHistoryList, setWorkHistoryList] = useState<WorkHistory[]>(data?.workHistory ?? []);
   const [projectList, setProjectList] = useState<Project[]>(data?.projects ?? []);
   const [selectedProjectIndex, setSelectedProjectIndex] = useState<number | null>(null);
+  const [chatOpen, setChatOpen] = useState(false);
   const selectedProject =
     selectedProjectIndex !== null ? projectList[selectedProjectIndex] ?? null : null;
 
@@ -685,6 +687,10 @@ export function DesignerDetailPage() {
               </div>
             </div>
           </div>
+
+          {/* ── Skill Chat Agent ─────────────────────────── */}
+          {!chatOpen && <SkillChatToggle onClick={() => setChatOpen(true)} />}
+          {chatOpen && <SkillChatPanel onClose={() => setChatOpen(false)} />}
         </>
       )}
 
