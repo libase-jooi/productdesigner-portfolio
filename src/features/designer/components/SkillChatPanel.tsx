@@ -1,131 +1,171 @@
 import { useState, useRef, useEffect } from "react";
-
-
-/* ═══════════════════════════════════════════════════════════════
-   Suggestion chips — 具体的な4パターン
-   ═══════════════════════════════════════════════════════════════ */
-
-const INITIAL_SUGGESTIONS = [
-  "プロジェクト概要を整理したい",
-  "背景・課題の書き方を教えて",
-  "成果を定量的に表現したい",
-  "担当役割をわかりやすく書きたい",
-];
+import type { DesignerWithRelations } from "@/api/schema";
 
 /* ═══════════════════════════════════════════════════════════════
-   Mock AI responses — 質問案＋回答選択肢付き
+   パーソナライズされたモック応答を生成
    ═══════════════════════════════════════════════════════════════ */
 
-const INITIAL_MESSAGE = `こんにちは！ポートフォリオの入力をお手伝いします ✏️
+function buildInitialMessage(d: DesignerWithRelations): string {
+  const currentJob = d.workHistory.find((w) => w.isCurrent);
+  const jobLabel = currentJob
+    ? `${currentJob.company}で${currentJob.role ?? "デザイナー"}をされている`
+    : "";
+  const projCount = d.projects.length;
 
-アップロードした資料をもとに、各項目の書き方をサポートします。
+  return `${d.name}さん、こんにちは！
 
-下のボタンから選ぶか、自由に質問してください。`;
+${jobLabel ? `${jobLabel}んですね。` : ""}${
+    projCount > 0
+      ? `現在${projCount}件のプロジェクトが登録されています。`
+      : "まだプロジェクトが登録されていないようです。"
+  }
+
+あなたの資料と登録済みの情報をもとに、ポートフォリオの内容を一緒にブラッシュアップしましょう。`;
+}
+
+function buildInitialSuggestions(d: DesignerWithRelations): string[] {
+  const suggestions: string[] = [];
+  const firstProject = d.projects[0];
+
+  if (firstProject) {
+    suggestions.push(`「${firstProject.title}」の概要をもっと具体的にしたい`);
+  } else {
+    suggestions.push("最初のプロジェクトを追加したい");
+  }
+
+  const hasEmptyBackground = d.projects.some((p) => !p.background);
+  if (hasEmptyBackground) {
+    suggestions.push("背景・課題が空のプロジェクトを埋めたい");
+  } else {
+    suggestions.push("背景・課題の表現をブラッシュアップしたい");
+  }
+
+  const hasMetrics = d.projects.some((p) => p.metrics.length > 0);
+  if (!hasMetrics) {
+    suggestions.push("成果を数値で表現する方法を教えて");
+  } else {
+    suggestions.push("成果の表現をもっとインパクトのあるものにしたい");
+  }
+
+  if (!d.bio) {
+    suggestions.push("自己紹介文を作ってほしい");
+  } else {
+    suggestions.push("自己紹介文をブラッシュアップしたい");
+  }
+
+  return suggestions;
+}
 
 interface MockResponse {
   text: string;
   followUps: string[];
 }
 
-const MOCK_RESPONSES: { keyword: string; response: MockResponse }[] = [
-  {
-    keyword: "概要",
-    response: {
-      text: `**プロジェクト概要**の書き方のポイント：
+function buildResponses(d: DesignerWithRelations): {
+  responses: { keyword: string; response: MockResponse }[];
+  fallback: MockResponse;
+} {
+  const currentJob = d.workHistory.find((w) => w.isCurrent);
+  const allDomains = Array.from(new Set(d.projects.flatMap((p) => p.domainTags)));
+  const allSkills = Array.from(new Set(d.projects.flatMap((p) => p.skillTags)));
+  const firstProject = d.projects[0];
+  const secondProject = d.projects[1];
 
-以下の3点を含めると伝わりやすくなります：
-1. **何を作ったか** — プロダクトやサービスの概要
-2. **誰のために** — ターゲットユーザー
-3. **なぜ** — ビジネス上の目的や課題
-
-あなたの資料から読み取った内容をもとに整理できます。どの方向で進めますか？`,
-      followUps: [
-        "toB向けSaaSの概要を整理したい",
-        "アプリリニューアル案件の概要を書きたい",
-        "ターゲットユーザーの記述を深めたい",
-        "概要の文字数はどのくらいがいい？",
-      ],
+  const responses: { keyword: string; response: MockResponse }[] = [
+    {
+      keyword: "概要",
+      response: {
+        text: firstProject
+          ? `「${firstProject.title}」の概要を見てみましょう。\n\n${firstProject.overview ? `現在の記述：\n> ${firstProject.overview}` : "まだ概要が書かれていません。"}\n\n${allDomains.length > 0 ? `${d.name}さんは${allDomains.slice(0, 3).join("・")}の領域で活動されていますね。` : ""}${currentJob ? `${currentJob.company}での経験` : "これまでの経験"}を踏まえると、「誰の・どんな課題を・どう解決したか」を1〜2文で書くのが効果的です。\n\nどう進めますか？`
+          : `まだプロジェクトが登録されていません。まずは1つ目のプロジェクトを追加しましょう。`,
+        followUps: [
+          firstProject ? `「${firstProject.title}」の概要を一緒に書いてみよう` : "新しいプロジェクトの概要を書きたい",
+          secondProject ? `「${secondProject.title}」の概要も見てほしい` : "概要の長さはどのくらいがいい？",
+          "ターゲットユーザーをもっと具体的にしたい",
+          "ビジネスインパクトを冒頭に入れたい",
+        ],
+      },
     },
-  },
-  {
-    keyword: "背景",
-    response: {
-      text: `**背景・課題**を書くコツ：
-
-読み手が「なぜこのプロジェクトが必要だったのか」を理解できるように：
-- **ビジネス背景**: 市場や競合の状況
-- **ユーザー課題**: 具体的なペインポイント
-- **既存の問題**: 現状のどこに課題があったか
-
-あなたの資料にいくつか手がかりがあります。どの切り口で深掘りしますか？`,
-      followUps: [
-        "ビジネス背景から書き始めたい",
-        "ユーザーインタビュー結果を整理したい",
-        "競合との差別化ポイントを明確にしたい",
-        "課題を箇条書きで簡潔にまとめたい",
-      ],
+    {
+      keyword: "背景",
+      response: {
+        text: `${d.name}さんのプロジェクトの背景・課題を整理しましょう。\n\n${d.projects.slice(0, 3).map((p) => `• ${p.title}: ${p.background ? "記述あり ✓" : "⚠️ まだ書かれていません"}`).join("\n")}\n\n${allDomains.length > 0 ? `${allDomains.join("・")}の領域では、業界特有の課題感を入れると説得力が増します。\n\n` : ""}読み手（採用担当やクライアント）が「なぜこのプロジェクトが必要だったのか」を理解できるよう、ビジネス背景 → ユーザー課題 → 解くべき問題の順で書くのがおすすめです。`,
+        followUps: d.projects.slice(0, 3).map((p) =>
+          p.background
+            ? `「${p.title}」の背景をブラッシュアップ`
+            : `「${p.title}」の背景を一緒に書く`
+        ).concat(["業界特有の課題感の書き方を教えて"]).slice(0, 4),
+      },
     },
-  },
-  {
-    keyword: "成果",
-    response: {
-      text: `**成果・インパクト**を効果的に書くには：
+    {
+      keyword: "成果",
+      response: {
+        text: (() => {
+          const withMetrics = d.projects.filter((p) => p.metrics.length > 0);
+          const withoutMetrics = d.projects.filter((p) => p.metrics.length === 0);
 
-定量＋定性の組み合わせが理想です：
-- **定量**: 「CVR 15%改善」「問い合わせ数 30%削減」
-- **定性**: 「社内の意思決定フローが明確化された」
+          let text = `${d.name}さんのプロジェクトの成果表現を見てみます。\n\n`;
 
-数字がない場合でも表現方法はあります。どのパターンが近いですか？`,
-      followUps: [
-        "KPI改善の数値がある",
-        "数値はないが定性的な成果がある",
-        "ビフォー/アフターで比較したい",
-        "ステークホルダーの声を引用したい",
-      ],
+          if (withMetrics.length > 0) {
+            text += `数値成果があるプロジェクト：\n`;
+            withMetrics.forEach((p) => {
+              text += `• **${p.title}**: ${p.metrics.slice(0, 2).join("、")}\n`;
+            });
+            text += `\nこれは良い素材です！さらに**比較対象**（前年比、業界平均比）を加えるとインパクトが増します。\n`;
+          }
+
+          if (withoutMetrics.length > 0) {
+            text += `\n数値がまだないプロジェクト：\n`;
+            withoutMetrics.forEach((p) => {
+              text += `• **${p.title}**\n`;
+            });
+            text += `\n数値が思い出せなくても、**ビフォー/アフター**や**ステークホルダーの声**で表現できます。`;
+          }
+
+          return text;
+        })(),
+        followUps: [
+          "KPI改善の数値を整理して書きたい",
+          "数値がないプロジェクトの成果表現を考えたい",
+          "ステークホルダーからのフィードバックを引用したい",
+          "ビフォー/アフター形式で書きたい",
+        ],
+      },
     },
-  },
-  {
-    keyword: "役割",
-    response: {
-      text: `**担当役割**の書き方：
-
-単なる肩書きではなく、実際にやったことが伝わる表現にしましょう：
-
-例：
-- ×「UIデザイナー」
-- ○「UIデザイナーとして、デザインシステムの構築とプロトタイプ作成を主導」
-
-どんな役割でしたか？`,
-      followUps: [
-        "リードデザイナーとして全体を主導した",
-        "チームの一員として特定領域を担当した",
-        "複数の役割を兼任していた",
-        "役割が途中で変わった",
-      ],
+    {
+      keyword: "役割",
+      response: {
+        text: `${d.name}さんのプロジェクトでの役割を確認しますね。\n\n${d.projects.slice(0, 4).map((p) => `• ${p.title}: ${p.role ?? "役割未記入 ⚠️"}${p.team ? `（${p.team}）` : ""}`).join("\n")}\n\n${allSkills.length > 0 ? `${allSkills.slice(0, 4).join("・")}などのスキルをお持ちなので、` : ""}単なる肩書きではなく「具体的に何を主導・担当したか」を書くと、スキルの深さが伝わります。\n\n例：「${allSkills[0] ?? "UI設計"}を担当」→「${allSkills[0] ?? "UI設計"}として、〇〇の設計・実装を主導し、チーム内のレビュー体制も構築」`,
+        followUps: d.projects.slice(0, 3).map((p) =>
+          `「${p.title}」の役割を具体化したい`
+        ).concat(["複数の役割を兼任していた場合の書き方"]).slice(0, 4),
+      },
     },
-  },
-];
+    {
+      keyword: "自己紹介",
+      response: {
+        text: `${d.name}さんの自己紹介文を${d.bio ? "ブラッシュアップ" : "作成"}しましょう。\n\n${d.bio ? `現在の自己紹介：\n> ${d.bio}` : "まだ自己紹介が書かれていません。"}\n\n${currentJob ? `${currentJob.company}での${currentJob.role ?? ""}の経験` : ""}${allDomains.length > 0 ? `、${allDomains.slice(0, 3).join("・")}の領域での実績` : ""}を踏まえて、3〜5行で「何ができる人か」が伝わる文章にしましょう。\n\nポイント：\n• 1行目で専門性のサマリー\n• 中盤で得意な領域・アプローチ\n• 最後に今後の方向性や価値提供`,
+        followUps: [
+          "専門性を前面に出した自己紹介にしたい",
+          "柔らかいトーンで書きたい",
+          "経歴をベースに自動生成してほしい",
+          "英語版も作りたい",
+        ],
+      },
+    },
+  ];
 
-const DEFAULT_RESPONSE: MockResponse = {
-  text: `なるほど、ありがとうございます！
+  const fallback: MockResponse = {
+    text: `${d.name}さん、ありがとうございます！\n\n${d.projects.length > 0 ? `現在${d.projects.length}件のプロジェクト` : ""}${d.workHistory.length > 0 ? `と${d.workHistory.length}件の経歴` : ""}が登録されていますね。${allDomains.length > 0 ? `\n${allDomains.join("・")}領域でのご経験を活かして、` : ""}ポートフォリオの内容を充実させましょう。\n\nどのあたりを改善しますか？`,
+    followUps: [
+      d.projects[0] ? `「${d.projects[0].title}」を深掘りしたい` : "プロジェクトを追加したい",
+      "全体的な見え方を改善したい",
+      d.bio ? "自己紹介文をブラッシュアップしたい" : "自己紹介文を作りたい",
+      "スキルの見せ方を相談したい",
+    ],
+  };
 
-あなたの資料を参考にしながら一緒に考えましょう。
-
-もう少し教えてください：`,
-  followUps: [
-    "プロジェクトの概要を整理したい",
-    "具体的な成果を書きたい",
-    "担当した役割を明確にしたい",
-    "アプローチの説明を追加したい",
-  ],
-};
-
-function getAIResponse(input: string): MockResponse {
-  const lower = input.toLowerCase();
-  for (const { keyword, response } of MOCK_RESPONSES) {
-    if (lower.includes(keyword)) return response;
-  }
-  return DEFAULT_RESPONSE;
+  return { responses, fallback };
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -138,9 +178,35 @@ interface ChatMessage {
   suggestions?: string[];
 }
 
-export function SkillChatPanel({ onClose }: { onClose: () => void }) {
+interface SkillChatPanelProps {
+  onClose: () => void;
+  designer?: DesignerWithRelations | null;
+}
+
+export function SkillChatPanel({ onClose, designer }: SkillChatPanelProps) {
+  const d = designer;
+  const initialMessage = d ? buildInitialMessage(d) : "こんにちは！ポートフォリオの入力をお手伝いします。下のボタンから選ぶか、自由に質問してください。";
+  const initialSuggestions = d ? buildInitialSuggestions(d) : [
+    "プロジェクト概要を整理したい",
+    "背景・課題の書き方を教えて",
+    "成果を定量的に表現したい",
+    "担当役割をわかりやすく書きたい",
+  ];
+
+  const { responses: mockResponses, fallback } = d
+    ? buildResponses(d)
+    : { responses: [], fallback: { text: "もう少し具体的に教えてください。", followUps: [] } };
+
+  const getAIResponse = (input: string): MockResponse => {
+    const lower = input.toLowerCase();
+    for (const { keyword, response } of mockResponses) {
+      if (lower.includes(keyword)) return response;
+    }
+    return fallback;
+  };
+
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: INITIAL_MESSAGE, suggestions: INITIAL_SUGGESTIONS },
+    { role: "assistant", content: initialMessage, suggestions: initialSuggestions },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -198,7 +264,9 @@ export function SkillChatPanel({ onClose }: { onClose: () => void }) {
           </div>
           <div>
             <h3 className="type-label-md text-on-surface">入力アシスタント</h3>
-            <p className="type-body-sm text-on-surface-variant text-xs">ポートフォリオの入力補助</p>
+            {d && (
+              <p className="type-body-sm text-on-surface-variant text-xs">{d.name}さんのポートフォリオ</p>
+            )}
           </div>
         </div>
         <button
@@ -221,7 +289,11 @@ export function SkillChatPanel({ onClose }: { onClose: () => void }) {
             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
             <polyline points="14 2 14 8 20 8" />
           </svg>
-          <span className="text-xs">あなたの資料(.md)を参照中</span>
+          <span className="text-xs">
+            {d
+              ? `${d.projects.length}件のプロジェクト・${d.workHistory.length}件の経歴を参照中`
+              : "あなたの資料(.md)を参照中"}
+          </span>
         </p>
       </div>
 

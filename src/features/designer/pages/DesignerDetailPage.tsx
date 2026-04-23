@@ -684,7 +684,7 @@ export function DesignerDetailPage() {
 
           {/* ── Skill Chat Agent ─────────────────────────── */}
           {!chatOpen && <SkillChatToggle onClick={() => setChatOpen(true)} />}
-          {chatOpen && <SkillChatPanel onClose={() => setChatOpen(false)} />}
+          {chatOpen && <SkillChatPanel onClose={() => setChatOpen(false)} designer={data} />}
         </>
       )}
 
