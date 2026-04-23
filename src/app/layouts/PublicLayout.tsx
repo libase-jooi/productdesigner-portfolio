@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, Outlet, ScrollRestoration, useNavigate } from "react-router-dom";
+import { Link, Outlet, ScrollRestoration, useNavigate, useSearchParams } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentDesigner } from "@/shared/hooks/useCurrentDesigner";
 import { OnboardingDialog } from "@/shared/components/OnboardingDialog";
@@ -12,8 +12,18 @@ function designerUrl(d: { id: string; slug: string | null }) {
 export function PublicLayout() {
   const navigate = useNavigate();
   const { designer, allDesigners, switchDesigner } = useCurrentDesigner();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [switcherOpen, setSwitcherOpen] = useState(false);
-  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const onboardingOpen = searchParams.has("guide");
+  const setOnboardingOpen = (open: boolean) => {
+    if (open) {
+      searchParams.set("guide", "");
+      setSearchParams(searchParams, { replace: true });
+    } else {
+      searchParams.delete("guide");
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
   const [uploadOpen, setUploadOpen] = useState(false);
   const switcherRef = useRef<HTMLDivElement>(null);
 

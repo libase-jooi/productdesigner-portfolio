@@ -426,7 +426,7 @@ function ProjectCard({
       className="group block w-full text-left"
     >
       <article
-        className={`rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer ${
+        className={`rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:elevation-3 active:scale-[0.99] ${
           index === 0
             ? "bg-surface-container-low elevation-2"
             : "bg-surface-container-low elevation-1"

@@ -109,17 +109,17 @@ function buildResponses(d: DesignerWithRelations): {
           if (withMetrics.length > 0) {
             text += `数値成果があるプロジェクト：\n`;
             withMetrics.forEach((p) => {
-              text += `• **${p.title}**: ${p.metrics.slice(0, 2).join("、")}\n`;
+              text += `• ${p.title}: ${p.metrics.slice(0, 2).join("、")}\n`;
             });
-            text += `\nこれは良い素材です！さらに**比較対象**（前年比、業界平均比）を加えるとインパクトが増します。\n`;
+            text += `\nこれは良い素材です！さらに比較対象（前年比、業界平均比）を加えるとインパクトが増します。\n`;
           }
 
           if (withoutMetrics.length > 0) {
             text += `\n数値がまだないプロジェクト：\n`;
             withoutMetrics.forEach((p) => {
-              text += `• **${p.title}**\n`;
+              text += `• ${p.title}\n`;
             });
-            text += `\n数値が思い出せなくても、**ビフォー/アフター**や**ステークホルダーの声**で表現できます。`;
+            text += `\n数値が思い出せなくても、ビフォー/アフターやステークホルダーの声で表現できます。`;
           }
 
           return text;

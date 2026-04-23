@@ -109,6 +109,9 @@ export function AdminDesignerListPage() {
                 信頼度
               </TableHead>
               <TableHead className="type-label-md text-on-surface-variant">
+                公開
+              </TableHead>
+              <TableHead className="type-label-md text-on-surface-variant">
                 取り込み日
               </TableHead>
               <TableHead className="type-label-md text-on-surface-variant pr-6 text-right">
@@ -179,19 +182,52 @@ export function AdminDesignerListPage() {
                       </span>
                     )}
                   </TableCell>
+                  <TableCell>
+                    {d.publishedAt && d.slug ? (
+                      <Link
+                        to={`/p/${d.slug}`}
+                        className="inline-flex items-center gap-1.5 type-label-sm text-primary hover:underline"
+                      >
+                        <span className="h-2 w-2 rounded-full bg-tertiary shrink-0" />
+                        公開中
+                      </Link>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 type-label-sm text-on-surface-variant">
+                        <span className="h-2 w-2 rounded-full bg-outline-variant shrink-0" />
+                        非公開
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell className="type-body-sm text-on-surface-variant">
                     {new Date(d.importedAt).toLocaleDateString("ja-JP")}
                   </TableCell>
                   <TableCell className="pr-6 text-right">
-                    <Link to={`/admin/designers/${d.id}`}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="type-label-md text-primary hover:bg-primary-fixed rounded-lg"
-                      >
-                        編集
-                      </Button>
-                    </Link>
+                    <div className="flex items-center justify-end gap-1">
+                      {d.slug && (
+                        <Link to={`/p/${d.slug}`} target="_blank">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="type-label-md text-on-surface-variant hover:bg-surface-container-high rounded-lg"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M15 3h6v6" />
+                              <path d="M10 14 21 3" />
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            </svg>
+                          </Button>
+                        </Link>
+                      )}
+                      <Link to={`/admin/designers/${d.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="type-label-md text-primary hover:bg-primary-fixed rounded-lg"
+                        >
+                          編集
+                        </Button>
+                      </Link>
+                    </div>
                   </TableCell>
                 </TableRow>
               );

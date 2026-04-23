@@ -147,7 +147,7 @@ export function OnboardingDialog({ open, onOpenChange, onStartUpload }: Onboardi
         onOpenChange(o);
       }}
     >
-      <DialogContent className="sm:max-w-lg min-h-[520px] p-0 gap-0 overflow-hidden border-0 ring-0 ring-transparent bg-transparent shadow-2xl rounded-2xl" showCloseButton={false}>
+      <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden border-0 ring-0 ring-transparent bg-transparent shadow-2xl rounded-2xl" showCloseButton={false}>
         <div className="rounded-2xl overflow-hidden flex flex-col">
           {/* Hero visual area - deep indigo gradient */}
           <div
@@ -175,7 +175,7 @@ export function OnboardingDialog({ open, onOpenChange, onStartUpload }: Onboardi
           </div>
 
           {/* Content area - clean white */}
-          <div className="bg-surface px-8 py-6 space-y-6 flex-1">
+          <div className="bg-surface px-8 py-6 space-y-6">
             <div className="space-y-3">
               <h2 className="type-headline-sm text-on-surface whitespace-pre-line leading-tight tracking-tight">
                 {current.title}

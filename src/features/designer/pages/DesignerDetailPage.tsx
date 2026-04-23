@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,12 @@ import { EmploymentType, PhaseTag, AvailabilityStatus } from "@/api/schema";
 
 type PageMode = "view" | "edit" | "confirm";
 
+function getPageMode(searchParams: URLSearchParams): PageMode {
+  const m = searchParams.get("mode");
+  if (m === "edit" || m === "confirm") return m;
+  return "view";
+}
+
 export function DesignerDetailPage() {
   const { designerId, slug } = useParams<{
     designerId?: string;
@@ -30,7 +36,16 @@ export function DesignerDetailPage() {
     ? getMockDesignerBySlug(slug)
     : getMockDesigner(designerId ?? "");
 
-  const [mode, setMode] = useState<PageMode>("view");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const mode = getPageMode(searchParams);
+  const setMode = (m: PageMode) => {
+    if (m === "view") {
+      searchParams.delete("mode");
+    } else {
+      searchParams.set("mode", m);
+    }
+    setSearchParams(searchParams, { replace: true });
+  };
   const [uploadOpen, setUploadOpen] = useState(false);
   const [isPublished, setIsPublished] = useState(data?.publishedAt !== null);
   const [editingSlug, setEditingSlug] = useState(false);
@@ -1608,7 +1623,7 @@ function ProjectCard({
       className="group block w-full text-left"
     >
       <article
-        className={`rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer ${
+        className={`rounded-xl sm:rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:elevation-3 active:scale-[0.99] ${
           index === 0
             ? "bg-surface-container-low elevation-2"
             : "bg-surface-container-low elevation-1"
