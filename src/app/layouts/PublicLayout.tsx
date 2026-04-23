@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentDesigner } from "@/shared/hooks/useCurrentDesigner";
+import { OnboardingDialog } from "@/shared/components/OnboardingDialog";
+import { UploadDialog } from "@/features/upload/components/UploadDialog";
 
 function designerUrl(d: { id: string; slug: string | null }) {
   return d.slug ? `/portfolio/${d.slug}` : `/designers/${d.id}`;
@@ -11,6 +13,8 @@ export function PublicLayout() {
   const navigate = useNavigate();
   const { designer, allDesigners, switchDesigner } = useCurrentDesigner();
   const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
   const switcherRef = useRef<HTMLDivElement>(null);
 
   // 外側クリックで閉じる
@@ -46,6 +50,13 @@ export function PublicLayout() {
             />
           </Link>
           <nav className="flex items-center gap-3 sm:gap-4">
+            <button
+              onClick={() => setOnboardingOpen(true)}
+              className="type-label-sm text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+              title="オンボーディングを表示"
+            >
+              Guide
+            </button>
             <Link
               to="/admin"
               className="type-label-sm text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
@@ -137,6 +148,13 @@ export function PublicLayout() {
       <main className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
         <Outlet />
       </main>
+
+      <OnboardingDialog
+        open={onboardingOpen}
+        onOpenChange={setOnboardingOpen}
+        onStartUpload={() => setUploadOpen(true)}
+      />
+      <UploadDialog open={uploadOpen} onOpenChange={setUploadOpen} />
     </div>
   );
 }

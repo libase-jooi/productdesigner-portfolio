@@ -14,12 +14,14 @@ import type {
   Confidence,
   ReviewStatus,
   DesignerWithRelations,
+  SocialLinks,
 } from "@/api/schema";
 import {
   SourceType,
   EmploymentType,
   PhaseTag,
   DesignerStatus,
+  AvailabilityStatus,
 } from "@/api/schema";
 
 export function AdminDesignerEditPage() {
@@ -198,6 +200,94 @@ function BasicInfoForm({ designer: d }: { designer: DesignerWithRelations }) {
               />
             )}
           </div>
+        </FormField>
+
+        <FormField label="自己紹介" className="sm:col-span-2">
+          <Textarea
+            defaultValue={d.bio ?? ""}
+            placeholder="3〜5行で自己紹介を記入"
+            className="bg-surface-container-high border-none rounded-lg type-body-md text-on-surface min-h-24"
+          />
+        </FormField>
+
+        <FormField label="稼働状況">
+          <NativeSelect
+            defaultValue={d.availabilityStatus ?? ""}
+            options={["", ...AvailabilityStatus]}
+            placeholder="選択してください"
+          />
+        </FormField>
+
+        <FormField label="稼働状況の補足">
+          <Input
+            defaultValue={d.availabilityNote ?? ""}
+            placeholder="例: 2025年7月〜稼働可能"
+            className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+          />
+        </FormField>
+      </div>
+
+      {/* SNSリンク */}
+      <div className="flex items-center gap-3 pt-4">
+        <h3 className="type-title-sm text-on-surface shrink-0">SNSリンク</h3>
+        <div className="h-px flex-1 bg-outline-variant/30" />
+      </div>
+      <div className="grid gap-6 sm:grid-cols-2">
+        <FormField label="X (Twitter)">
+          <Input
+            defaultValue={d.socialLinks?.x ?? ""}
+            placeholder="https://x.com/..."
+            type="url"
+            className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+          />
+        </FormField>
+        <FormField label="note">
+          <Input
+            defaultValue={d.socialLinks?.note ?? ""}
+            placeholder="https://note.com/..."
+            type="url"
+            className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+          />
+        </FormField>
+        <FormField label="LinkedIn">
+          <Input
+            defaultValue={d.socialLinks?.linkedin ?? ""}
+            placeholder="https://linkedin.com/in/..."
+            type="url"
+            className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+          />
+        </FormField>
+        <FormField label="GitHub">
+          <Input
+            defaultValue={d.socialLinks?.github ?? ""}
+            placeholder="https://github.com/..."
+            type="url"
+            className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+          />
+        </FormField>
+        <FormField label="Dribbble">
+          <Input
+            defaultValue={d.socialLinks?.dribbble ?? ""}
+            placeholder="https://dribbble.com/..."
+            type="url"
+            className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+          />
+        </FormField>
+        <FormField label="Behance">
+          <Input
+            defaultValue={d.socialLinks?.behance ?? ""}
+            placeholder="https://behance.net/..."
+            type="url"
+            className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+          />
+        </FormField>
+        <FormField label="個人サイト" className="sm:col-span-2">
+          <Input
+            defaultValue={d.socialLinks?.website ?? ""}
+            placeholder="https://..."
+            type="url"
+            className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+          />
         </FormField>
       </div>
     </div>

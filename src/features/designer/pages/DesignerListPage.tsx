@@ -101,8 +101,22 @@ export function DesignerListPage() {
                       <p className="type-body-sm text-on-surface-variant">
                         {d.sourceType}
                       </p>
+                      {d.availabilityStatus && (
+                        <div className="flex items-center gap-1.5">
+                          <span className="h-1.5 w-1.5 rounded-full bg-tertiary shrink-0" />
+                          <span className="type-label-sm text-on-surface">
+                            {d.availabilityStatus}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
+
+                  {d.bio && (
+                    <p className="mt-2 sm:mt-3 type-body-sm text-on-surface-variant line-clamp-2">
+                      {d.bio}
+                    </p>
+                  )}
 
                   <div className="mt-3 sm:mt-4 flex items-center justify-between">
                     <div className="flex gap-1.5">

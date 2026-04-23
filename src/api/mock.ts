@@ -11,6 +11,7 @@
 import type {
   DesignerWithRelations,
   Project,
+  SocialLinks,
   WorkHistory,
 } from "./schema";
 
@@ -620,6 +621,14 @@ export const mockDesigners: DesignerWithRelations[] = [
     publishedAt: "2026-04-09T12:00:00Z",
     profileImageUrl:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face",
+    bio: "「複雑をシンプルに、シンプルを心地よく」をモットーに、toB SaaSプロダクトのUX/UIデザインに取り組んでいます。リサーチからデザインシステム構築まで一貫して担当できることが強みです。ユーザーが「考えずに使える」体験を目指して、日々デザインしています。",
+    socialLinks: {
+      x: "https://x.com/saori_hirose",
+      note: "https://note.com/saori_hirose",
+      linkedin: "https://linkedin.com/in/saori-hirose",
+    },
+    availabilityStatus: "募集中",
+    availabilityNote: null,
     rawText: null,
     projects: d1Projects,
     workHistory: d1WorkHistory,
@@ -637,6 +646,14 @@ export const mockDesigners: DesignerWithRelations[] = [
     publishedAt: "2026-04-08T18:00:00Z",
     profileImageUrl:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+    bio: "エージェンシーで培った「ビジネス視点×ユーザー視点」の両立が強みです。大規模toCプロダクトのUX戦略策定から、ブランド体験の設計までを一気通貫で手がけています。クライアントの事業を深く理解し、デザインで成果を出すことにこだわっています。",
+    socialLinks: {
+      x: "https://x.com/kevin_yao_design",
+      linkedin: "https://linkedin.com/in/kevin-yao",
+      behance: "https://behance.net/kevinyao",
+    },
+    availabilityStatus: "稼働中",
+    availabilityNote: null,
     rawText: null,
     projects: d2Projects,
     workHistory: d2WorkHistory,
@@ -654,6 +671,13 @@ export const mockDesigners: DesignerWithRelations[] = [
     publishedAt: "2026-04-10T15:00:00Z",
     profileImageUrl:
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+    bio: "ヘルスケアと教育という「人の行動を変える」領域に情熱を持っています。行動経済学やナッジ理論をデザインに応用し、ユーザーが自然と良い習慣を身につけられる体験を設計することが得意です。",
+    socialLinks: {
+      x: "https://x.com/yuka_sunada",
+      note: "https://note.com/yuka_sunada",
+    },
+    availabilityStatus: "相談可",
+    availabilityNote: "2025年7月〜稼働可能",
     rawText: null,
     projects: d3Projects,
     workHistory: d3WorkHistory,
@@ -670,6 +694,10 @@ export const mockDesigners: DesignerWithRelations[] = [
     importedAt: "2026-04-15T00:00:00Z",
     publishedAt: null,
     profileImageUrl: null,
+    bio: null,
+    socialLinks: null,
+    availabilityStatus: null,
+    availabilityNote: null,
     rawText: null,
     projects: [],
     workHistory: [],

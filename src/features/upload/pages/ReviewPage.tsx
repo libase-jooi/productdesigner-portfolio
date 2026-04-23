@@ -5,13 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { getMockDesigner } from "@/api/mock";
 import type {
   Project,
   WorkHistory,
   Confidence,
+  DesignerWithRelations,
 } from "@/api/schema";
-import { EmploymentType, PhaseTag } from "@/api/schema";
+import { EmploymentType, PhaseTag, AvailabilityStatus } from "@/api/schema";
 
 export function ReviewPage() {
   const { designerId } = useParams<{ designerId: string }>();
@@ -39,6 +47,7 @@ export function ReviewPage() {
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
 
   const handleSave = () => {
     setSaving(true);
@@ -51,7 +60,12 @@ export function ReviewPage() {
   };
 
   const handleTogglePublish = () => {
+    setPublishConfirmOpen(true);
+  };
+
+  const confirmTogglePublish = () => {
     setIsPublished((prev) => !prev);
+    setPublishConfirmOpen(false);
     // TODO: API call to publish/unpublish
   };
 
@@ -112,6 +126,9 @@ export function ReviewPage() {
         />
       </div>
 
+      {/* ── Basic Info ── */}
+      <BasicInfoSection designer={data} />
+
       {/* ── Projects ── */}
       <section className="space-y-4">
         <h2 className="type-headline-sm text-on-surface">
@@ -139,9 +156,24 @@ export function ReviewPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <ConfidenceSummaryDots projects={data.projects} workHistory={data.workHistory} />
-            <span className="type-body-sm text-on-surface-variant hidden sm:inline">
-              {total}件中{highCount}件が高信頼度
-            </span>
+            <div className="hidden sm:flex flex-col">
+              <span className="type-body-sm text-on-surface-variant">
+                {total}件中{highCount}件が高信頼度
+              </span>
+              <span className="type-label-sm text-on-surface-variant/60">
+                {isPublished ? (
+                  <span className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-tertiary" />
+                    公開中 — URLを知っている人が閲覧できます
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-on-surface-variant/40" />
+                    非公開 — あなただけが閲覧できます
+                  </span>
+                )}
+              </span>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             {isPublished && (
@@ -179,7 +211,168 @@ export function ReviewPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Publish Confirmation Dialog ── */}
+      <Dialog open={publishConfirmOpen} onOpenChange={setPublishConfirmOpen}>
+        <DialogContent className="sm:max-w-sm p-6 gap-5">
+          <DialogHeader>
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full mb-2"
+              style={{
+                background: isPublished
+                  ? "var(--surface-container-high)"
+                  : "var(--tertiary-fixed)",
+              }}
+            >
+              {isPublished ? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-on-surface-variant">
+                  <path d="M17 14V20H5V10H7" />
+                  <path d="M13 2H7V8" />
+                  <path d="m2 9 9-9" />
+                  <path d="m17 2 5 5-5 5" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-on-tertiary-container">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+              )}
+            </div>
+            <DialogTitle className="type-headline-sm text-on-surface text-center">
+              {isPublished
+                ? "ポートフォリオを非公開にしますか？"
+                : "ポートフォリオを公開しますか？"}
+            </DialogTitle>
+            <DialogDescription className="type-body-md text-on-surface-variant text-center">
+              {isPublished
+                ? "非公開にすると、公開URLからアクセスできなくなります。データは保持されるので、いつでも再公開できます。"
+                : "公開すると、あなた専用のURL（jooi.design/p/" + (data.slug ?? "your-name") + "）で誰でも閲覧できるようになります。公開後も内容の編集や非公開への変更はいつでも可能です。"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex gap-3 pt-1">
+            <Button
+              variant="outline"
+              onClick={() => setPublishConfirmOpen(false)}
+              className="flex-1 rounded-xl type-label-md border-outline-variant text-on-surface-variant"
+            >
+              キャンセル
+            </Button>
+            <Button
+              onClick={confirmTogglePublish}
+              className={`flex-1 rounded-xl type-label-md border-none ${
+                isPublished
+                  ? "bg-surface-container-high text-on-surface hover:bg-surface-container-highest"
+                  : "gradient-primary text-white"
+              }`}
+            >
+              {isPublished ? "非公開にする" : "公開する"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Basic Info Section
+   ═══════════════════════════════════════════════════════════════ */
+
+function BasicInfoSection({ designer: d }: { designer: DesignerWithRelations }) {
+  return (
+    <section className="space-y-4">
+      <h2 className="type-headline-sm text-on-surface">基本情報</h2>
+      <div className="rounded-2xl bg-surface-container-low p-6 space-y-6">
+        <div className="grid gap-6 sm:grid-cols-2">
+          <FormField label="自己紹介" className="sm:col-span-2">
+            <Textarea
+              defaultValue={d.bio ?? ""}
+              placeholder="3〜5行で自己紹介を記入"
+              className="bg-surface-container-high border-none rounded-lg type-body-md text-on-surface min-h-24"
+            />
+          </FormField>
+
+          <FormField label="稼働状況">
+            <NativeSelect
+              defaultValue={d.availabilityStatus ?? ""}
+              options={["", ...AvailabilityStatus]}
+              placeholder="選択してください"
+            />
+          </FormField>
+
+          <FormField label="稼働状況の補足">
+            <Input
+              defaultValue={d.availabilityNote ?? ""}
+              placeholder="例: 2025年7月〜稼働可能"
+              className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+            />
+          </FormField>
+        </div>
+
+        {/* SNSリンク */}
+        <div className="flex items-center gap-3 pt-2">
+          <h3 className="type-title-sm text-on-surface shrink-0">SNSリンク</h3>
+          <div className="h-px flex-1 bg-outline-variant/30" />
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2">
+          <FormField label="X (Twitter)">
+            <Input
+              defaultValue={d.socialLinks?.x ?? ""}
+              placeholder="https://x.com/..."
+              type="url"
+              className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+            />
+          </FormField>
+          <FormField label="note">
+            <Input
+              defaultValue={d.socialLinks?.note ?? ""}
+              placeholder="https://note.com/..."
+              type="url"
+              className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+            />
+          </FormField>
+          <FormField label="LinkedIn">
+            <Input
+              defaultValue={d.socialLinks?.linkedin ?? ""}
+              placeholder="https://linkedin.com/in/..."
+              type="url"
+              className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+            />
+          </FormField>
+          <FormField label="GitHub">
+            <Input
+              defaultValue={d.socialLinks?.github ?? ""}
+              placeholder="https://github.com/..."
+              type="url"
+              className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+            />
+          </FormField>
+          <FormField label="Dribbble">
+            <Input
+              defaultValue={d.socialLinks?.dribbble ?? ""}
+              placeholder="https://dribbble.com/..."
+              type="url"
+              className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+            />
+          </FormField>
+          <FormField label="Behance">
+            <Input
+              defaultValue={d.socialLinks?.behance ?? ""}
+              placeholder="https://behance.net/..."
+              type="url"
+              className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+            />
+          </FormField>
+          <FormField label="個人サイト" className="sm:col-span-2">
+            <Input
+              defaultValue={d.socialLinks?.website ?? ""}
+              placeholder="https://..."
+              type="url"
+              className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
+            />
+          </FormField>
+        </div>
+      </div>
+    </section>
   );
 }
 

@@ -25,9 +25,23 @@ export type EmploymentType = (typeof EmploymentType)[number];
 export const PhaseTag = ["0→1", "グロース", "改善", "リニューアル", "デザインシステム"] as const;
 export type PhaseTag = (typeof PhaseTag)[number];
 
+export const AvailabilityStatus = ["募集中", "稼働可能（時期指定）", "稼働中", "相談可"] as const;
+export type AvailabilityStatus = (typeof AvailabilityStatus)[number];
+
 // Domain / Skill タグは新規追加OKなので string
 export type DomainTag = string;
 export type SkillTag = string;
+
+// SNSリンク
+export interface SocialLinks {
+  x?: string;       // X (Twitter) URL
+  note?: string;    // note URL
+  linkedin?: string; // LinkedIn URL
+  github?: string;   // GitHub URL
+  dribbble?: string; // Dribbble URL
+  behance?: string;  // Behance URL
+  website?: string;  // 個人サイト URL
+}
 
 // ─── Resources ──────────────────────────────────────
 
@@ -41,6 +55,10 @@ export interface Designer {
   importedAt: string; // ISO 8601
   publishedAt: string | null; // null = 非公開
   profileImageUrl: string | null;
+  bio: string | null; // 自己紹介文（3〜5行程度）
+  socialLinks: SocialLinks | null; // SNSリンク
+  availabilityStatus: AvailabilityStatus | null; // 稼働状況
+  availabilityNote: string | null; // 稼働状況の補足（例: "2025年7月〜"）
   rawText: string | null; // 抽出した生テキスト（デバッグ用）
   createdAt: string;
   updatedAt: string;
