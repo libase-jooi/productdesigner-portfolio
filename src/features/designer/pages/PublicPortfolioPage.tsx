@@ -910,82 +910,86 @@ function SkillRadarChart({ scores, subSkillScores }: { scores: SkillScores; subS
 }
 
 function SkillDetailList({ scores, subSkillScores }: { scores: SkillScores; subSkillScores?: SubSkillScores | null }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expandedAxes, setExpandedAxes] = useState<Record<string, boolean>>({});
+
+  const toggleAxis = (key: string) => {
+    setExpandedAxes((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   return (
-    <div className="flex-1 space-y-2 w-full">
-      {SKILL_AXES.map((axis) => (
-        <div
-          key={axis.key}
-          className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface"
-        >
-          <span className="type-label-md text-on-surface shrink-0 w-28 sm:w-40 text-left">
-            {axis.label}
-          </span>
-          <div className="flex-1 flex items-center gap-1">
-            {Array.from({ length: 5 }, (_, i) => (
-              <div
-                key={i}
-                className={`h-2 flex-1 rounded-full ${
-                  i < scores[axis.key]
-                    ? "bg-primary"
-                    : "bg-surface-container-high"
-                }`}
-              />
-            ))}
-          </div>
-          <span className="type-label-md text-primary font-semibold w-6 text-right">
-            {scores[axis.key]}
-          </span>
-        </div>
-      ))}
-
-      <button
-        type="button"
-        onClick={() => setExpanded(!expanded)}
-        className="flex items-center justify-center gap-1.5 w-full py-2 type-label-md text-on-surface-variant hover:text-on-surface transition-colors"
-      >
-        <span>{expanded ? "詳細を閉じる" : "詳細を見る"}</span>
-        <span className={`transition-transform ${expanded ? "rotate-180" : ""}`}>▼</span>
-      </button>
-
-      {expanded && (
-        <div className="space-y-4 pt-2">
-          {SKILL_AXES.map((axis) => (
-            <div key={axis.key} className="space-y-1.5">
-              <h3 className="type-label-md text-on-surface font-semibold px-1">{axis.label}</h3>
-              <div className="rounded-xl border border-outline-variant/50 bg-surface-container divide-y divide-outline-variant/30">
-                {axis.subSkills.map((sub) => {
-                  const level = subSkillScores?.[sub.key] ?? 0;
-                  const levelDesc = level > 0 ? sub.levels[level - 1] : null;
-                  return (
-                    <div
-                      key={sub.key}
-                      className="flex items-start gap-2 px-4 py-2.5"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/50 shrink-0 mt-1.5" />
-                      <div>
-                        <span className="type-label-sm text-on-surface">
-                          {sub.name}
-                          {level > 0 && (
-                            <span className="ml-2 type-label-sm text-primary font-semibold">
-                              Lv.{level}
-                            </span>
-                          )}
-                        </span>
-                        {levelDesc && (
-                          <p className="type-body-sm text-on-surface-variant">
-                            {levelDesc}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+    <div className="flex-1 w-full space-y-3">
+      {/* 5軸バー：常に上部に表示 */}
+      <div className="space-y-2">
+        {SKILL_AXES.map((axis) => (
+          <button
+            key={axis.key}
+            type="button"
+            onClick={() => toggleAxis(axis.key)}
+            className={`flex items-center gap-2 w-full px-4 py-3 rounded-xl border bg-surface transition-colors ${
+              expandedAxes[axis.key]
+                ? "border-primary/30 bg-primary/5"
+                : "border-outline-variant hover:bg-surface-container-low"
+            }`}
+          >
+            <span className="type-label-md text-on-surface shrink-0 w-28 sm:w-40 text-left">
+              {axis.label}
+            </span>
+            <div className="flex-1 flex items-center gap-1">
+              {Array.from({ length: 5 }, (_, i) => (
+                <div
+                  key={i}
+                  className={`h-2 flex-1 rounded-full ${
+                    i < scores[axis.key]
+                      ? "bg-primary"
+                      : "bg-surface-container-high"
+                  }`}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+            <span className="type-label-md text-primary font-semibold w-6 text-right">
+              {scores[axis.key]}
+            </span>
+            <span className={`text-on-surface-variant transition-transform text-xs ${expandedAxes[axis.key] ? "rotate-180" : ""}`}>▼</span>
+          </button>
+        ))}
+      </div>
+
+      {/* 展開された詳細：軸バーの下に表示 */}
+      {SKILL_AXES.map((axis) =>
+        expandedAxes[axis.key] ? (
+          <div key={axis.key} className="space-y-1.5">
+            <h3 className="type-label-md text-on-surface font-semibold px-1">{axis.label}</h3>
+            <div className="rounded-xl border border-outline-variant/50 bg-surface-container divide-y divide-outline-variant/30">
+              {axis.subSkills.map((sub) => {
+                const level = subSkillScores?.[sub.key] ?? 0;
+                const levelDesc = level > 0 ? sub.levels[level - 1] : null;
+                return (
+                  <div
+                    key={sub.key}
+                    className="flex items-start gap-2 px-4 py-2.5"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary/50 shrink-0 mt-1.5" />
+                    <div>
+                      <span className="type-label-sm text-on-surface">
+                        {sub.name}
+                        {level > 0 && (
+                          <span className="ml-2 type-label-sm text-primary font-semibold">
+                            Lv.{level}
+                          </span>
+                        )}
+                      </span>
+                      {levelDesc && (
+                        <p className="type-body-sm text-on-surface-variant">
+                          {levelDesc}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : null
       )}
     </div>
   );

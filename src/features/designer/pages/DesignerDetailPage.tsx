@@ -411,6 +411,13 @@ export function DesignerDetailPage() {
                 {selectedProject && (
                   <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col p-0">
                     <DialogHeader className="shrink-0 p-4 sm:p-6 pb-0 sm:pb-0 pr-12">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-surface-container-high px-2 py-0.5 type-label-sm text-on-surface-variant">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                          Proto Design
+                        </span>
+                        <ShareUrlButton slug={data?.slug} designerId={data?.id} />
+                      </div>
                       <DialogTitle className="type-headline-sm sm:type-headline-lg text-on-surface">
                         {selectedProject.title}
                       </DialogTitle>
@@ -1701,6 +1708,45 @@ function ProjectCard({
   );
 }
 
+/* ── Share URL Button ───────────────────────────────────── */
+
+function ShareUrlButton({ slug, designerId }: { slug?: string | null; designerId?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const publicPath = slug ? `/p/${slug}` : designerId ? `/designers/${designerId}` : null;
+  if (!publicPath) return null;
+
+  const fullUrl = `${window.location.origin}${publicPath}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 type-label-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"
+      title={fullUrl}
+    >
+      {copied ? (
+        <>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          コピー済み
+        </>
+      ) : (
+        <>
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          URLをコピー
+        </>
+      )}
+    </button>
+  );
+}
+
 /* ── Project Modal Body ──────────────────────────────────── */
 
 function ProjectModalBody({ project: p }: { project: Project }) {
@@ -2237,83 +2283,87 @@ function SkillRadarChart({ scores, subSkillScores }: { scores: SkillScores; subS
 }
 
 function SkillDetailList({ scores, subSkillScores }: { scores: SkillScores; subSkillScores: SubSkillScores | null }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expandedAxes, setExpandedAxes] = useState<Record<string, boolean>>({});
+
+  const toggleAxis = (key: string) => {
+    setExpandedAxes((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   return (
-    <div className="flex-1 space-y-2 w-full">
-      {SKILL_AXES.map((axis) => (
-        <div
-          key={axis.key}
-          className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-outline-variant bg-surface"
-        >
-          <span className="type-label-md text-on-surface shrink-0 w-28 sm:w-40 text-left">
-            {axis.label}
-          </span>
-          <div className="flex-1 flex items-center gap-1">
-            {Array.from({ length: 5 }, (_, i) => (
-              <div
-                key={i}
-                className={`h-2 flex-1 rounded-full ${
-                  i < scores[axis.key]
-                    ? "bg-primary"
-                    : "bg-surface-container-high"
-                }`}
-              />
-            ))}
-          </div>
-          <span className="type-label-md text-primary font-semibold w-6 text-right">
-            {scores[axis.key]}
-          </span>
-        </div>
-      ))}
+    <div className="flex-1 w-full space-y-3">
+      {/* 5軸バー：常に上部に表示 */}
+      <div className="space-y-2">
+        {SKILL_AXES.map((axis) => (
+          <button
+            key={axis.key}
+            type="button"
+            onClick={() => toggleAxis(axis.key)}
+            className={`flex items-center gap-2 w-full px-4 py-3 rounded-xl border bg-surface transition-colors ${
+              expandedAxes[axis.key]
+                ? "border-primary/30 bg-primary/5"
+                : "border-outline-variant hover:bg-surface-container-low"
+            }`}
+          >
+            <span className="type-label-md text-on-surface shrink-0 w-28 sm:w-40 text-left">
+              {axis.label}
+            </span>
+            <div className="flex-1 flex items-center gap-1">
+              {Array.from({ length: 5 }, (_, i) => (
+                <div
+                  key={i}
+                  className={`h-2 flex-1 rounded-full ${
+                    i < scores[axis.key]
+                      ? "bg-primary"
+                      : "bg-surface-container-high"
+                  }`}
+                />
+              ))}
+            </div>
+            <span className="type-label-md text-primary font-semibold w-6 text-right">
+              {scores[axis.key]}
+            </span>
+            <span className={`text-on-surface-variant transition-transform text-xs ${expandedAxes[axis.key] ? "rotate-180" : ""}`}>▼</span>
+          </button>
+        ))}
+      </div>
 
-      <button
-        type="button"
-        onClick={() => setExpanded(!expanded)}
-        className="flex items-center justify-center gap-1.5 w-full py-2 type-label-md text-on-surface-variant hover:text-on-surface transition-colors"
-      >
-        <span>{expanded ? "詳細を閉じる" : "詳細を見る"}</span>
-        <span className={`transition-transform ${expanded ? "rotate-180" : ""}`}>▼</span>
-      </button>
-
-      {expanded && (
-        <div className="space-y-4 pt-2">
-          {SKILL_AXES.map((axis) => (
-            <div key={axis.key} className="space-y-1.5">
-              <h3 className="type-label-md text-on-surface font-semibold px-1">{axis.label}</h3>
-              <div className="rounded-xl border border-outline-variant/50 bg-surface-container divide-y divide-outline-variant/30">
-                {axis.subSkills.map((sub) => {
-                  const level = subSkillScores?.[sub.key] ?? null;
-                  return (
-                    <div
-                      key={sub.key}
-                      className="flex items-start gap-2 px-4 py-2.5"
-                    >
-                      <span className="h-1.5 w-1.5 rounded-full bg-primary/50 shrink-0 mt-1.5" />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="type-label-sm text-on-surface">
-                            {sub.name}
-                          </span>
-                          {level !== null && (
-                            <span className="type-label-sm text-primary font-semibold">
-                              Lv.{level}
-                            </span>
-                          )}
-                        </div>
+      {/* 展開された詳細：軸バーの下に表示 */}
+      {SKILL_AXES.map((axis) =>
+        expandedAxes[axis.key] ? (
+          <div key={axis.key} className="space-y-1.5">
+            <h3 className="type-label-md text-on-surface font-semibold px-1">{axis.label}</h3>
+            <div className="rounded-xl border border-outline-variant/50 bg-surface-container divide-y divide-outline-variant/30">
+              {axis.subSkills.map((sub) => {
+                const level = subSkillScores?.[sub.key] ?? null;
+                return (
+                  <div
+                    key={sub.key}
+                    className="flex items-start gap-2 px-4 py-2.5"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary/50 shrink-0 mt-1.5" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="type-label-sm text-on-surface">
+                          {sub.name}
+                        </span>
                         {level !== null && (
-                          <p className="type-body-sm text-on-surface-variant">
-                            {sub.levels[level - 1]}
-                          </p>
+                          <span className="type-label-sm text-primary font-semibold">
+                            Lv.{level}
+                          </span>
                         )}
                       </div>
+                      {level !== null && (
+                        <p className="type-body-sm text-on-surface-variant">
+                          {sub.levels[level - 1]}
+                        </p>
+                      )}
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
+          </div>
+        ) : null
       )}
     </div>
   );

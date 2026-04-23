@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, ScrollRestoration } from "react-router-dom";
 
 export function LandingLayout() {
   return (
@@ -34,6 +34,7 @@ export function LandingLayout() {
           </nav>
         </div>
       </header>
+      <ScrollRestoration />
       <Outlet />
     </div>
   );

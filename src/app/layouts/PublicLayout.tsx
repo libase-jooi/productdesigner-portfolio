@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, ScrollRestoration, useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentDesigner } from "@/shared/hooks/useCurrentDesigner";
 import { OnboardingDialog } from "@/shared/components/OnboardingDialog";
@@ -149,6 +149,7 @@ export function PublicLayout() {
         <Outlet />
       </main>
 
+      <ScrollRestoration />
       <OnboardingDialog
         open={onboardingOpen}
         onOpenChange={setOnboardingOpen}
