@@ -11,26 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { getMockDesignerBySlug } from "@/api/mock";
-import type { Project, WorkHistory, SocialLinks } from "@/api/schema";
+import type { Project, WorkHistory, SocialLinks, SkillScores } from "@/api/schema";
 
 export function PublicPortfolioPage() {
   const { slug } = useParams<{ slug: string }>();
   const data = getMockDesignerBySlug(slug ?? "");
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const selectedProject =
-    selectedIndex !== null ? data.projects[selectedIndex] ?? null : null;
-
-  const goToPrev = useCallback(() => {
-    setSelectedIndex((i) =>
-      i !== null && i > 0 ? i - 1 : i
-    );
-  }, []);
-  const goToNext = useCallback(() => {
-    setSelectedIndex((i) =>
-      i !== null && i < data.projects.length - 1 ? i + 1 : i
-    );
-  }, [data.projects.length]);
 
   if (!data) {
     return (
@@ -42,6 +29,20 @@ export function PublicPortfolioPage() {
       </div>
     );
   }
+
+  const selectedProject =
+    selectedIndex !== null ? data.projects[selectedIndex] ?? null : null;
+
+  const goToPrev = () => {
+    setSelectedIndex((i) =>
+      i !== null && i > 0 ? i - 1 : i
+    );
+  };
+  const goToNext = () => {
+    setSelectedIndex((i) =>
+      i !== null && i < data.projects.length - 1 ? i + 1 : i
+    );
+  };
 
   // 非公開チェック
   if (!data.publishedAt) {
@@ -137,6 +138,16 @@ export function PublicPortfolioPage() {
           </div>
         )}
       </section>
+
+      {/* ── Skill Radar Chart ─────────────────────────── */}
+      {data.skillScores && (
+        <section className="space-y-6 sm:space-y-8">
+          <h2 className="type-headline-md sm:type-headline-lg text-on-surface">
+            スキル診断
+          </h2>
+          <SkillRadarChart scores={data.skillScores} />
+        </section>
+      )}
 
       {/* ── Content ──────────────────────────────────── */}
       {data.workHistory.length === 0 && data.projects.length === 0 ? (
@@ -698,6 +709,175 @@ function ProjectModalBody({ project: p }: { project: Project }) {
           <p className="type-body-md text-on-surface italic">"{p.quote}"</p>
         </blockquote>
       )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Skill Radar Chart (SVG)
+   ═══════════════════════════════════════════════════════════════ */
+
+const SKILL_AXES: { key: keyof SkillScores; label: string; shortLabel: string }[] = [
+  { key: "strategyDesign", label: "戦略設計力", shortLabel: "戦略" },
+  { key: "research", label: "リサーチ力", shortLabel: "リサーチ" },
+  { key: "uxDesign", label: "UX設計力", shortLabel: "UX設計" },
+  { key: "uiImplementation", label: "画面設計・実装運用力", shortLabel: "画面設計" },
+  { key: "aiUtilization", label: "AI活用力", shortLabel: "AI活用" },
+];
+
+function SkillRadarChart({ scores }: { scores: SkillScores }) {
+  const cx = 150;
+  const cy = 150;
+  const maxR = 100;
+  const levels = 5;
+  const axes = SKILL_AXES.length;
+
+  const angleStep = (2 * Math.PI) / axes;
+  const startAngle = -Math.PI / 2;
+
+  const getPoint = (index: number, value: number) => {
+    const angle = startAngle + index * angleStep;
+    const r = (value / levels) * maxR;
+    return {
+      x: cx + r * Math.cos(angle),
+      y: cy + r * Math.sin(angle),
+    };
+  };
+
+  const gridPaths = Array.from({ length: levels }, (_, level) => {
+    const r = ((level + 1) / levels) * maxR;
+    const points = Array.from({ length: axes }, (_, i) => {
+      const angle = startAngle + i * angleStep;
+      return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+    });
+    return points.join(" ");
+  });
+
+  const dataPoints = SKILL_AXES.map((axis, i) =>
+    getPoint(i, scores[axis.key])
+  );
+  const dataPolygon = dataPoints.map((p) => `${p.x},${p.y}`).join(" ");
+
+  const labelPoints = SKILL_AXES.map((_, i) => {
+    const angle = startAngle + i * angleStep;
+    const r = maxR + 32;
+    return {
+      x: cx + r * Math.cos(angle),
+      y: cy + r * Math.sin(angle),
+    };
+  });
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
+      <div className="shrink-0">
+        <svg viewBox="0 0 300 300" className="w-64 h-64 sm:w-72 sm:h-72">
+          {gridPaths.map((points, i) => (
+            <polygon
+              key={i}
+              points={points}
+              fill="none"
+              stroke="var(--outline-variant)"
+              strokeWidth="0.5"
+              opacity={0.4}
+            />
+          ))}
+
+          {SKILL_AXES.map((_, i) => {
+            const p = getPoint(i, levels);
+            return (
+              <line
+                key={i}
+                x1={cx}
+                y1={cy}
+                x2={p.x}
+                y2={p.y}
+                stroke="var(--outline-variant)"
+                strokeWidth="0.5"
+                opacity={0.3}
+              />
+            );
+          })}
+
+          <polygon
+            points={dataPolygon}
+            fill="var(--primary)"
+            fillOpacity={0.15}
+            stroke="var(--primary)"
+            strokeWidth="2"
+          />
+
+          {dataPoints.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={4}
+              fill="var(--primary)"
+            />
+          ))}
+
+          {labelPoints.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y}
+              textAnchor="middle"
+              dominantBaseline="central"
+              fill="var(--on-surface-variant)"
+              fontSize="11"
+              fontWeight="500"
+            >
+              {SKILL_AXES[i].shortLabel}
+            </text>
+          ))}
+
+          {dataPoints.map((p, i) => {
+            const angle = startAngle + i * angleStep;
+            const offsetR = 14;
+            return (
+              <text
+                key={`score-${i}`}
+                x={p.x + offsetR * Math.cos(angle)}
+                y={p.y + offsetR * Math.sin(angle)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill="var(--primary)"
+                fontSize="10"
+                fontWeight="600"
+              >
+                {scores[SKILL_AXES[i].key]}
+              </text>
+            );
+          })}
+        </svg>
+      </div>
+
+      <div className="flex-1 space-y-3 w-full">
+        {SKILL_AXES.map((axis) => (
+          <div key={axis.key} className="flex items-center gap-3">
+            <div className="flex items-center gap-2 w-full">
+              <span className="type-label-md text-on-surface shrink-0 w-28 sm:w-40">
+                {axis.label}
+              </span>
+              <div className="flex-1 flex items-center gap-1">
+                {Array.from({ length: 5 }, (_, i) => (
+                  <div
+                    key={i}
+                    className={`h-2 flex-1 rounded-full ${
+                      i < scores[axis.key]
+                        ? "bg-primary"
+                        : "bg-surface-container-high"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="type-label-md text-primary font-semibold w-6 text-right">
+                {scores[axis.key]}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

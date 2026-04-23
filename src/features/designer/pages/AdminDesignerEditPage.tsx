@@ -14,7 +14,6 @@ import type {
   Confidence,
   ReviewStatus,
   DesignerWithRelations,
-  SocialLinks,
 } from "@/api/schema";
 import {
   SourceType,

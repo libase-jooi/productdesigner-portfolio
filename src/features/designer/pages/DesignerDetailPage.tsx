@@ -1176,6 +1176,7 @@ function ProjectFormCard({ project: p }: { project: Project }) {
               defaultValue={p.thumbnailUrl}
               label="サムネイル画像"
               aspectRatio="16/9"
+              maxWidth="480px"
             />
 
             <FormField

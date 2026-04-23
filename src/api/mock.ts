@@ -11,7 +11,6 @@
 import type {
   DesignerWithRelations,
   Project,
-  SocialLinks,
   WorkHistory,
 } from "./schema";
 
@@ -629,6 +628,13 @@ export const mockDesigners: DesignerWithRelations[] = [
     },
     availabilityStatus: "募集中",
     availabilityNote: null,
+    skillScores: {
+      strategyDesign: 4,
+      research: 5,
+      uxDesign: 4,
+      uiImplementation: 5,
+      aiUtilization: 3,
+    },
     rawText: null,
     projects: d1Projects,
     workHistory: d1WorkHistory,
@@ -654,6 +660,13 @@ export const mockDesigners: DesignerWithRelations[] = [
     },
     availabilityStatus: "稼働中",
     availabilityNote: null,
+    skillScores: {
+      strategyDesign: 5,
+      research: 4,
+      uxDesign: 5,
+      uiImplementation: 4,
+      aiUtilization: 3,
+    },
     rawText: null,
     projects: d2Projects,
     workHistory: d2WorkHistory,
@@ -678,6 +691,13 @@ export const mockDesigners: DesignerWithRelations[] = [
     },
     availabilityStatus: "相談可",
     availabilityNote: "2025年7月〜稼働可能",
+    skillScores: {
+      strategyDesign: 3,
+      research: 5,
+      uxDesign: 4,
+      uiImplementation: 3,
+      aiUtilization: 4,
+    },
     rawText: null,
     projects: d3Projects,
     workHistory: d3WorkHistory,
@@ -698,6 +718,7 @@ export const mockDesigners: DesignerWithRelations[] = [
     socialLinks: null,
     availabilityStatus: null,
     availabilityNote: null,
+    skillScores: null,
     rawText: null,
     projects: [],
     workHistory: [],
