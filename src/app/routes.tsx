@@ -10,6 +10,7 @@ import { DesignerListPage } from "@/features/designer/pages/DesignerListPage";
 import { DesignerDetailPage } from "@/features/designer/pages/DesignerDetailPage";
 import { PublicPortfolioPage } from "@/features/designer/pages/PublicPortfolioPage";
 import { ProjectDetailPage } from "@/features/project/pages/ProjectDetailPage";
+import { SkillCheckPage } from "@/features/designer/pages/SkillCheckPage";
 import { ProcessingPage } from "@/features/upload/pages/ProcessingPage";
 import { ReviewPage } from "@/features/upload/pages/ReviewPage";
 import { AdminDesignerListPage } from "@/features/designer/pages/AdminDesignerListPage";
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
       { path: "upload/processing", element: <ProcessingPage /> },
       { path: "upload/review/:designerId", element: <ReviewPage /> },
       { path: "designers/:designerId", element: <DesignerDetailPage /> },
+      { path: "designers/:designerId/skill-check", element: <SkillCheckPage /> },
       { path: "portfolio/:slug", element: <DesignerDetailPage /> },
       { path: "projects/:projectId", element: <ProjectDetailPage /> },
     ],

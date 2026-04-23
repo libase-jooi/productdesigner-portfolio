@@ -111,7 +111,7 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl p-6 gap-6">
+      <DialogContent className="sm:max-w-xl p-6 gap-6 min-h-[420px]">
         <DialogHeader>
           <DialogTitle className="type-headline-sm text-on-surface">
             ポートフォリオをアップロード

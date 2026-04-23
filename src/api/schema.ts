@@ -45,12 +45,15 @@ export interface SocialLinks {
 
 // 5軸スキル診断スコア
 export interface SkillScores {
-  strategyDesign: number;    // 1. 戦略設計力（1〜5）
-  research: number;          // 2. リサーチ力（1〜5）
+  strategyDesign: number;    // 1. ビジネス推進力（1〜5）
+  research: number;          // 2. 課題設定力（1〜5）
   uxDesign: number;          // 3. UX設計力（1〜5）
   uiImplementation: number;  // 4. 画面設計・実装運用力（1〜5）
   aiUtilization: number;     // 5. AI活用力（1〜5）
 }
+
+// サブスキル別スコア（各1〜5）
+export type SubSkillScores = Record<string, number>;
 
 // ─── Resources ──────────────────────────────────────
 
@@ -69,6 +72,7 @@ export interface Designer {
   availabilityStatus: AvailabilityStatus | null; // 稼働状況
   availabilityNote: string | null; // 稼働状況の補足（例: "2025年7月〜"）
   skillScores: SkillScores | null; // 5軸スキル診断スコア（各1〜5）
+  subSkillScores: SubSkillScores | null; // サブスキル別スコア
   rawText: string | null; // 抽出した生テキスト（デバッグ用）
   createdAt: string;
   updatedAt: string;
