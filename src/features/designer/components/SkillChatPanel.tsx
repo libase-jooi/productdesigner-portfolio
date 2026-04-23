@@ -1,89 +1,131 @@
 import { useState, useRef, useEffect } from "react";
 
-/* ═══════════════════════════════════════════════════════════════
-   Skill-check context (from skill-check.md)
-   ═══════════════════════════════════════════════════════════════ */
-
-const SKILL_CONTEXT = `あなたはデザイナーのスキル診断をサポートするアシスタントです。
-以下の5軸×各サブスキルについて、ユーザーが自分のレベルを正しく自己評価できるよう壁打ち相手になってください。
-
-## 5つの軸
-1. ビジネス推進力（戦略設計、意思決定設計、合意形成、仮説検証、KPIマネジメント）
-2. 課題設定力（ドメイン理解、ユーザー理解、インサイト抽出、課題構造化、優先度設計）
-3. UX設計力（体験コンセプト設計、情報設計、導線設計、インタラクション設計、ユーザビリティ改善、状態・例外設計、アクセシビリティ）
-4. 画面設計・実装運用力（デザインシステム、構造設計、表層設計、実装連携、プロトタイピング、運用設計）
-5. AI活用力（情報収集、ツール選定、プロンプト設計、業務プロセス統合）
-
-各スキルはLv1〜Lv5の5段階で評価します。
-ユーザーの具体的な経験や業務内容を聞き出し、適切なレベルを一緒に考えてください。`;
 
 /* ═══════════════════════════════════════════════════════════════
-   Mock AI responses
+   Suggestion chips — 具体的な4パターン
    ═══════════════════════════════════════════════════════════════ */
 
-const INITIAL_MESSAGE = `こんにちは！スキル診断のお手伝いをします 🎯
+const INITIAL_SUGGESTIONS = [
+  "プロジェクト概要を整理したい",
+  "背景・課題の書き方を教えて",
+  "成果を定量的に表現したい",
+  "担当役割をわかりやすく書きたい",
+];
 
-各スキルについて「自分はどのレベルだろう？」と迷ったら、気軽に聞いてください。
+/* ═══════════════════════════════════════════════════════════════
+   Mock AI responses — 質問案＋回答選択肢付き
+   ═══════════════════════════════════════════════════════════════ */
 
-例えば：
-• 「戦略設計って何を基準に判断すればいい？」
-• 「ユーザー理解はLv3とLv4の違いがわからない」
-• 「私は○○な経験があるけど、何レベル？」
+const INITIAL_MESSAGE = `こんにちは！ポートフォリオの入力をお手伝いします ✏️
 
-どのスキルから考えましょうか？`;
+アップロードした資料をもとに、各項目の書き方をサポートします。
 
-const MOCK_RESPONSES: Record<string, string> = {
-  戦略: `**戦略設計**について考えてみましょう。
+下のボタンから選ぶか、自由に質問してください。`;
 
-判断のポイントは「事業戦略とデザイン判断の接続度」です：
+interface MockResponse {
+  text: string;
+  followUps: string[];
+}
 
-- **Lv2**: 事業戦略を理解して、自分の担当範囲で考えられる
-- **Lv3**: 事業戦略→プロダクト方針への翻訳ができる
-- **Lv4**: 事業インパクトから逆算して一貫性を担保できる
+const MOCK_RESPONSES: { keyword: string; response: MockResponse }[] = [
+  {
+    keyword: "概要",
+    response: {
+      text: `**プロジェクト概要**の書き方のポイント：
 
-具体的には、直近のプロジェクトで事業目標をどう設計に反映しましたか？`,
+以下の3点を含めると伝わりやすくなります：
+1. **何を作ったか** — プロダクトやサービスの概要
+2. **誰のために** — ターゲットユーザー
+3. **なぜ** — ビジネス上の目的や課題
 
-  意思決定: `**意思決定設計**のポイントは「判断の構造化レベル」です：
+あなたの資料から読み取った内容をもとに整理できます。どの方向で進めますか？`,
+      followUps: [
+        "toB向けSaaSの概要を整理したい",
+        "アプリリニューアル案件の概要を書きたい",
+        "ターゲットユーザーの記述を深めたい",
+        "概要の文字数はどのくらいがいい？",
+      ],
+    },
+  },
+  {
+    keyword: "背景",
+    response: {
+      text: `**背景・課題**を書くコツ：
 
-- **Lv2**: 判断理由を説明できる
-- **Lv3**: 情報不十分でも暫定判断＋根拠明示できる
-- **Lv4**: リスク/リターンを踏まえて構造的に判断
+読み手が「なぜこのプロジェクトが必要だったのか」を理解できるように：
+- **ビジネス背景**: 市場や競合の状況
+- **ユーザー課題**: 具体的なペインポイント
+- **既存の問題**: 現状のどこに課題があったか
 
-最近、不確実な状況で判断を迫られた場面はありますか？`,
+あなたの資料にいくつか手がかりがあります。どの切り口で深掘りしますか？`,
+      followUps: [
+        "ビジネス背景から書き始めたい",
+        "ユーザーインタビュー結果を整理したい",
+        "競合との差別化ポイントを明確にしたい",
+        "課題を箇条書きで簡潔にまとめたい",
+      ],
+    },
+  },
+  {
+    keyword: "成果",
+    response: {
+      text: `**成果・インパクト**を効果的に書くには：
 
-  ユーザー: `**ユーザー理解**のレベル判定ポイント：
+定量＋定性の組み合わせが理想です：
+- **定量**: 「CVR 15%改善」「問い合わせ数 30%削減」
+- **定性**: 「社内の意思決定フローが明確化された」
 
-- **Lv2**: インタビューやデータ分析でユーザー行動を捉えられる
-- **Lv3**: 定性＋定量を組み合わせて文脈まで理解できる
-- **Lv4**: 複数手法を使い分けて設計判断に活かせる
+数字がない場合でも表現方法はあります。どのパターンが近いですか？`,
+      followUps: [
+        "KPI改善の数値がある",
+        "数値はないが定性的な成果がある",
+        "ビフォー/アフターで比較したい",
+        "ステークホルダーの声を引用したい",
+      ],
+    },
+  },
+  {
+    keyword: "役割",
+    response: {
+      text: `**担当役割**の書き方：
 
-普段どんな手法でユーザーを理解していますか？`,
+単なる肩書きではなく、実際にやったことが伝わる表現にしましょう：
 
-  ai: `**AI活用力**について：
+例：
+- ×「UIデザイナー」
+- ○「UIデザイナーとして、デザインシステムの構築とプロトタイプ作成を主導」
 
-この軸は比較的新しいので、素直に現状を評価するのがポイントです：
+どんな役割でしたか？`,
+      followUps: [
+        "リードデザイナーとして全体を主導した",
+        "チームの一員として特定領域を担当した",
+        "複数の役割を兼任していた",
+        "役割が途中で変わった",
+      ],
+    },
+  },
+];
 
-- **Lv2**: 指定ツールを使える
-- **Lv3**: 目的別に複数ツールを使い分け
-- **Lv4**: 業務フローに組み込んで活用
+const DEFAULT_RESPONSE: MockResponse = {
+  text: `なるほど、ありがとうございます！
 
-普段の業務でAIツールをどう使っていますか？`,
+あなたの資料を参考にしながら一緒に考えましょう。
+
+もう少し教えてください：`,
+  followUps: [
+    "プロジェクトの概要を整理したい",
+    "具体的な成果を書きたい",
+    "担当した役割を明確にしたい",
+    "アプローチの説明を追加したい",
+  ],
 };
 
-function getAIResponse(input: string): string {
+function getAIResponse(input: string): MockResponse {
   const lower = input.toLowerCase();
-  for (const [key, response] of Object.entries(MOCK_RESPONSES)) {
-    if (lower.includes(key)) return response;
+  for (const { keyword, response } of MOCK_RESPONSES) {
+    if (lower.includes(keyword)) return response;
   }
-
-  return `なるほど、ありがとうございます！
-
-もう少し具体的に教えてください：
-- その業務では、どこまで自分が主導していましたか？
-- チームへの影響範囲はどのくらいでしたか？
-- 仕組み化やルール整備まで踏み込みましたか？
-
-これらが分かると、より正確なレベル判定ができます。`;
+  return DEFAULT_RESPONSE;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -93,11 +135,12 @@ function getAIResponse(input: string): string {
 interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  suggestions?: string[];
 }
 
 export function SkillChatPanel({ onClose }: { onClose: () => void }) {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: INITIAL_MESSAGE },
+    { role: "assistant", content: INITIAL_MESSAGE, suggestions: INITIAL_SUGGESTIONS },
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -108,27 +151,34 @@ export function SkillChatPanel({ onClose }: { onClose: () => void }) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const handleSend = () => {
-    const text = input.trim();
-    if (!text) return;
+  const sendMessage = (text: string) => {
+    if (!text.trim() || isTyping) return;
 
-    setMessages((prev) => [...prev, { role: "user", content: text }]);
+    setMessages((prev) => [...prev, { role: "user", content: text.trim() }]);
     setInput("");
     setIsTyping(true);
 
-    // Simulate AI response delay
     setTimeout(() => {
       const response = getAIResponse(text);
-      setMessages((prev) => [...prev, { role: "assistant", content: response }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: response.text, suggestions: response.followUps },
+      ]);
       setIsTyping(false);
     }, 800 + Math.random() * 600);
   };
+
+  const handleSend = () => sendMessage(input);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleSuggestionClick = (text: string) => {
+    sendMessage(text);
   };
 
   return (
@@ -147,8 +197,8 @@ export function SkillChatPanel({ onClose }: { onClose: () => void }) {
             </svg>
           </div>
           <div>
-            <h3 className="type-label-md text-on-surface">スキル診断アシスタント</h3>
-            <p className="type-body-sm text-on-surface-variant text-xs">壁打ちしながらレベルを考えよう</p>
+            <h3 className="type-label-md text-on-surface">入力アシスタント</h3>
+            <p className="type-body-sm text-on-surface-variant text-xs">ポートフォリオの入力補助</p>
           </div>
         </div>
         <button
@@ -171,26 +221,42 @@ export function SkillChatPanel({ onClose }: { onClose: () => void }) {
             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
             <polyline points="14 2 14 8 20 8" />
           </svg>
-          <span className="text-xs">skill-check.md を参照中</span>
+          <span className="text-xs">あなたの資料(.md)を参照中</span>
         </p>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-          >
+          <div key={i}>
             <div
-              className={`max-w-[85%] rounded-2xl px-4 py-2.5 type-body-sm whitespace-pre-wrap ${
-                msg.role === "user"
-                  ? "bg-primary text-white rounded-br-md"
-                  : "bg-surface-container text-on-surface rounded-bl-md"
-              }`}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              {msg.content}
+              <div
+                className={`max-w-[85%] rounded-2xl px-4 py-2.5 type-body-sm whitespace-pre-wrap ${
+                  msg.role === "user"
+                    ? "bg-primary text-white rounded-br-md"
+                    : "bg-surface-container text-on-surface rounded-bl-md"
+                }`}
+              >
+                {msg.content}
+              </div>
             </div>
+            {/* Suggestion chips */}
+            {msg.role === "assistant" && msg.suggestions && msg.suggestions.length > 0 && !isTyping && i === messages.length - 1 && (
+              <div className="flex flex-wrap gap-1.5 mt-2 ml-1">
+                {msg.suggestions.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => handleSuggestionClick(s)}
+                    className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 type-label-sm text-primary hover:bg-primary/10 transition-colors text-left"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ))}
 
@@ -217,7 +283,7 @@ export function SkillChatPanel({ onClose }: { onClose: () => void }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="スキルについて質問..."
+            placeholder="入力について質問..."
             rows={1}
             className="flex-1 resize-none rounded-xl border border-outline-variant bg-surface-container-low px-3 py-2.5 type-body-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-1 focus:ring-primary"
             style={{ maxHeight: "120px" }}
@@ -252,7 +318,7 @@ export function SkillChatToggle({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       className="fixed right-6 bottom-24 z-40 h-12 w-12 rounded-full bg-primary text-white elevation-4 flex items-center justify-center hover:bg-primary/90 transition-colors"
-      title="スキル診断アシスタント"
+      title="入力アシスタント"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 8V4H8" />

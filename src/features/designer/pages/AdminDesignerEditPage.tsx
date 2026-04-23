@@ -63,16 +63,28 @@ export function AdminDesignerEditPage() {
             </span>
           </div>
         </div>
-        <div className="flex gap-2">
-          <Link to={`/designers/${data.id}`}>
+        <Link to={`/designers/${data.id}`}>
+          <Button
+            variant="ghost"
+            className="type-label-md text-on-surface-variant hover:bg-surface-container rounded-lg"
+          >
+            プレビュー
+          </Button>
+        </Link>
+      </div>
+
+      {/* Floating Save Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-outline-variant/30">
+        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-end gap-3">
+          <Link to="/admin">
             <Button
               variant="ghost"
               className="type-label-md text-on-surface-variant hover:bg-surface-container rounded-lg"
             >
-              プレビュー
+              キャンセル
             </Button>
           </Link>
-          <Button className="gradient-primary text-on-primary rounded-2xl px-5">
+          <Button className="gradient-primary text-on-primary rounded-2xl px-6">
             保存
           </Button>
         </div>

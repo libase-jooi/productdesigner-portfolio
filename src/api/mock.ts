@@ -2,10 +2,10 @@
  * Mock Data — バックエンド接続前の仮データ
  * API実装後に削除
  *
- * d1: 廣瀬 紗央里 — toB SaaS特化のシニアプロダクトデザイナー。リサーチからDSまで一貫して担当。
- * d2: ヤオ ケビン — エージェンシー出身。大手toC案件のUX/ブランド戦略に強い。
- * d3: 砂田 祐佳 — ヘルスケア×教育ドメインのUXデザイナー。行動変容・習慣化設計が得意。
- * d4: 田中 美咲 — 新規登録直後のempty state。
+ * d1: 水谷 彩花 — toB SaaS特化のシニアプロダクトデザイナー。リサーチからDSまで一貫して担当。
+ * d2: リュウ アレン — エージェンシー出身。大手toC案件のUX/ブランド戦略に強い。
+ * d3: 森本 奈々 — ヘルスケア×教育ドメインのUXデザイナー。行動変容・習慣化設計が得意。
+ * d4: 吉川 結衣 — 新規登録直後のempty state。
  */
 
 import type {
@@ -15,7 +15,7 @@ import type {
 } from "./schema";
 
 /* ═══════════════════════════════════════════════════════════════
-   d1 — 廣瀬 紗央里
+   d1 — 水谷 彩花
    toB SaaS プロダクトデザイナー（freee → SmartHR → フリーランス）
    ═══════════════════════════════════════════════════════════════ */
 
@@ -243,7 +243,7 @@ const d1WorkHistory: WorkHistory[] = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════
-   d2 — ヤオ ケビン
+   d2 — リュウ アレン
    エージェンシー出身 toC UX/ブランド戦略デザイナー（Yahoo → Goodpatch）
    ═══════════════════════════════════════════════════════════════ */
 
@@ -452,7 +452,7 @@ const d2WorkHistory: WorkHistory[] = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════
-   d3 — 砂田 祐佳
+   d3 — 森本 奈々
    ヘルスケア × 教育ドメイン UXデザイナー（Schoo → メドレー）
    ═══════════════════════════════════════════════════════════════ */
 
@@ -611,20 +611,19 @@ const d3WorkHistory: WorkHistory[] = [
 export const mockDesigners: DesignerWithRelations[] = [
   {
     id: "d1",
-    name: "廣瀬 紗央里",
-    slug: "hirose-saori",
+    name: "水谷 彩花",
+    slug: "mizutani-ayaka",
     status: "完了",
-    sourceUrl: "https://example.com/hirose-portfolio.pdf",
-    sourceType: "PDF",
+    sourceUrl: "/data/designers/mizutani-ayaka.md",
+    sourceType: "その他",
     importedAt: "2026-04-09T00:00:00Z",
     publishedAt: "2026-04-09T12:00:00Z",
-    profileImageUrl:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face",
+    profileImageUrl: "/profile-mizutani-ayaka.png",
     bio: "「複雑をシンプルに、シンプルを心地よく」をモットーに、toB SaaSプロダクトのUX/UIデザインに取り組んでいます。リサーチからデザインシステム構築まで一貫して担当できることが強みです。ユーザーが「考えずに使える」体験を目指して、日々デザインしています。",
     socialLinks: {
-      x: "https://x.com/saori_hirose",
-      note: "https://note.com/saori_hirose",
-      linkedin: "https://linkedin.com/in/saori-hirose",
+      x: "https://x.com/ayaka_mizutani",
+      note: "https://note.com/ayaka_mizutani",
+      linkedin: "https://linkedin.com/in/ayaka-mizutani",
     },
     availabilityStatus: "募集中",
     availabilityNote: null,
@@ -672,20 +671,19 @@ export const mockDesigners: DesignerWithRelations[] = [
   },
   {
     id: "d2",
-    name: "ヤオ ケビン",
-    slug: "yao-kevin",
+    name: "リュウ アレン",
+    slug: "ryu-allen",
     status: "完了",
-    sourceUrl: "https://example.com/kevin-yao-behance",
-    sourceType: "Behance",
+    sourceUrl: "/data/designers/ryu-allen.md",
+    sourceType: "その他",
     importedAt: "2026-04-08T00:00:00Z",
     publishedAt: "2026-04-08T18:00:00Z",
-    profileImageUrl:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+    profileImageUrl: "/profile-ryu-allen.png",
     bio: "エージェンシーで培った「ビジネス視点×ユーザー視点」の両立が強みです。大規模toCプロダクトのUX戦略策定から、ブランド体験の設計までを一気通貫で手がけています。クライアントの事業を深く理解し、デザインで成果を出すことにこだわっています。",
     socialLinks: {
-      x: "https://x.com/kevin_yao_design",
-      linkedin: "https://linkedin.com/in/kevin-yao",
-      behance: "https://behance.net/kevinyao",
+      x: "https://x.com/allen_ryu_design",
+      linkedin: "https://linkedin.com/in/allen-ryu",
+      behance: "https://behance.net/allenryu",
     },
     availabilityStatus: "稼働中",
     availabilityNote: null,
@@ -733,19 +731,18 @@ export const mockDesigners: DesignerWithRelations[] = [
   },
   {
     id: "d3",
-    name: "砂田 祐佳",
-    slug: "sunada-yuka",
+    name: "森本 奈々",
+    slug: "morimoto-nana",
     status: "完了",
-    sourceUrl: "https://example.com/sunada-notion",
-    sourceType: "Notion",
+    sourceUrl: "/data/designers/morimoto-nana.md",
+    sourceType: "その他",
     importedAt: "2026-04-10T00:00:00Z",
     publishedAt: "2026-04-10T15:00:00Z",
-    profileImageUrl:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+    profileImageUrl: "/profile-morimoto-nana.png",
     bio: "ヘルスケアと教育という「人の行動を変える」領域に情熱を持っています。行動経済学やナッジ理論をデザインに応用し、ユーザーが自然と良い習慣を身につけられる体験を設計することが得意です。",
     socialLinks: {
-      x: "https://x.com/yuka_sunada",
-      note: "https://note.com/yuka_sunada",
+      x: "https://x.com/nana_morimoto",
+      note: "https://note.com/nana_morimoto",
     },
     availabilityStatus: "相談可",
     availabilityNote: "2025年7月〜稼働可能",
@@ -793,11 +790,11 @@ export const mockDesigners: DesignerWithRelations[] = [
   },
   {
     id: "d4",
-    name: "田中 美咲",
+    name: "吉川 結衣",
     slug: null,
     status: "処理中",
-    sourceUrl: "https://example.com/tanaka-portfolio",
-    sourceType: "Notion",
+    sourceUrl: "/data/designers/yoshikawa-yui.md",
+    sourceType: "その他",
     importedAt: "2026-04-15T00:00:00Z",
     publishedAt: null,
     profileImageUrl: null,

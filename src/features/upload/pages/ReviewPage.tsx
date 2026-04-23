@@ -59,22 +59,14 @@ export function ReviewPage() {
     }, 600);
   };
 
-  const handleTogglePublish = () => {
-    setPublishConfirmOpen(true);
-  };
-
   const confirmTogglePublish = () => {
     setIsPublished((prev) => !prev);
     setPublishConfirmOpen(false);
     // TODO: API call to publish/unpublish
   };
 
-  const handleViewPublic = () => {
-    navigate(`/portfolio/${data.slug}`);
-  };
-
   return (
-    <div className="space-y-8 pb-24">
+    <div className="space-y-8 pb-8">
       {/* ── Success Header ── */}
       <section className="pt-8 sm:pt-12 space-y-4">
         <div className="flex items-center gap-3">
@@ -134,7 +126,7 @@ export function ReviewPage() {
         <h2 className="type-headline-sm text-on-surface">
           プロジェクト ({data.projects.length})
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {data.projects.map((p) => (
             <ProjectCard key={p.id} project={p} />
           ))}
@@ -151,62 +143,26 @@ export function ReviewPage() {
         ))}
       </section>
 
-      {/* ── Sticky Bottom Bar ── */}
-      <div className="fixed inset-x-0 bottom-0 z-50 border-t border-outline-variant/30 bg-surface/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <ConfidenceSummaryDots projects={data.projects} workHistory={data.workHistory} />
-            <div className="hidden sm:flex flex-col">
-              <span className="type-body-sm text-on-surface-variant">
-                {total}件中{highCount}件が高信頼度
-              </span>
-              <span className="type-label-sm text-on-surface-variant/60">
-                {isPublished ? (
-                  <span className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-tertiary" />
-                    公開中 — URLを知っている人が閲覧できます
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-on-surface-variant/40" />
-                    非公開 — あなただけが閲覧できます
-                  </span>
-                )}
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            {isPublished && (
-              <Button
-                variant="ghost"
-                onClick={handleViewPublic}
-                className="rounded-xl px-4 type-label-md text-on-surface-variant hover:bg-surface-container"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1.5">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" x2="21" y1="14" y2="3" />
-                </svg>
-                公開ページを見る
-              </Button>
-            )}
+      {/* ── Bottom Action Bar ── */}
+      <div className="border-t border-outline-variant/30">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+          <p className="type-body-sm text-on-surface-variant hidden sm:block">
+            変更を確認して保存してください
+          </p>
+          <div className="flex items-center gap-3 ml-auto">
             <Button
               variant="outline"
-              onClick={handleTogglePublish}
-              className={`rounded-xl px-5 type-label-md ${
-                isPublished
-                  ? "border-outline-variant text-on-surface-variant hover:bg-surface-container"
-                  : "border-tertiary text-tertiary hover:bg-tertiary-fixed/30"
-              }`}
+              onClick={() => navigate(-1)}
+              className="rounded-xl px-6 h-14 text-base"
             >
-              {isPublished ? "非公開にする" : "公開する"}
+              キャンセル
             </Button>
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="rounded-xl px-6 type-label-md gradient-primary text-white border-none disabled:opacity-60"
+              className="rounded-xl px-6 h-14 text-base gradient-primary text-white border-none"
             >
-              {saving ? "保存中..." : saved ? "保存しました" : "保存"}
+              {saving ? "保存中..." : saved ? "保存しました" : "確認する"}
             </Button>
           </div>
         </div>
@@ -425,17 +381,6 @@ function ProjectCard({ project: p }: { project: Project }) {
 
   return (
     <div className="rounded-2xl bg-surface-container-low overflow-hidden">
-      {/* Thumbnail */}
-      {p.thumbnailUrl && (
-        <div className="w-full max-h-64 overflow-hidden bg-surface-container-high">
-          <img
-            src={p.thumbnailUrl}
-            alt={p.title}
-            className="w-full object-cover"
-          />
-        </div>
-      )}
-
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
@@ -494,6 +439,23 @@ function ProjectCard({ project: p }: { project: Project }) {
           <SectionTitle>必須項目</SectionTitle>
 
           <div className="grid gap-6 sm:grid-cols-2">
+            {/* Thumbnail as a form field */}
+            <FormField label="サムネイル画像" className="sm:col-span-2">
+              {p.thumbnailUrl ? (
+                <div className="rounded-lg overflow-hidden bg-surface-container-high max-w-sm">
+                  <img
+                    src={p.thumbnailUrl}
+                    alt={p.title}
+                    className="w-full object-cover aspect-[16/10]"
+                  />
+                </div>
+              ) : (
+                <div className="rounded-lg bg-surface-container-high max-w-sm aspect-[16/10] flex items-center justify-center text-on-surface-variant type-body-sm">
+                  画像なし
+                </div>
+              )}
+            </FormField>
+
             <FormField label="プロジェクト名" required className="sm:col-span-2">
               <Input
                 defaultValue={p.title}
@@ -964,27 +926,6 @@ function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
   );
 }
 
-function ConfidenceSummaryDots({
-  projects,
-  workHistory,
-}: {
-  projects: Project[];
-  workHistory: WorkHistory[];
-}) {
-  const items = [
-    ...projects.map((p) => p.confidence),
-    ...workHistory.map((w) => w.confidence),
-  ];
-  return (
-    <div className="flex items-center gap-1">
-      {items.map((c, i) => {
-        const color =
-          c === "高" ? "bg-tertiary" : c === "中" ? "bg-secondary-base" : "bg-error";
-        return <span key={i} className={`block h-2 w-2 rounded-full ${color}`} />;
-      })}
-    </div>
-  );
-}
 
 function ChevronIcon({ open }: { open: boolean }) {
   return (

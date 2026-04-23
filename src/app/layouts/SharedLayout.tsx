@@ -2,7 +2,7 @@ import { Link, Outlet, ScrollRestoration } from "react-router-dom";
 
 export function SharedLayout() {
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen">
       <header className="sticky top-0 z-50 glass">
         <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2">

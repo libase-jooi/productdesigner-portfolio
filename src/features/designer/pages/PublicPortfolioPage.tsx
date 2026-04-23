@@ -65,7 +65,83 @@ export function PublicPortfolioPage() {
   );
 
   return (
-    <div className="space-y-12 sm:space-y-20 pb-24 sm:pb-28">
+    <div className="space-y-12 sm:space-y-20 pb-24 sm:pb-28 min-h-screen relative">
+      {/* Ambient lavender background */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+        aria-hidden="true"
+      >
+        {/* Left edge — focal accent blob */}
+        <div
+          className="absolute"
+          style={{
+            top: "20%",
+            left: "-12%",
+            width: "55vw",
+            height: "60vh",
+            borderRadius: "50% 40% 55% 45%",
+            background: "radial-gradient(ellipse at center, #C4B5FD 0%, transparent 70%)",
+            opacity: 0.3,
+            filter: "blur(160px)",
+          }}
+        />
+        {/* Top-right soft blob */}
+        <div
+          className="absolute"
+          style={{
+            top: "-10%",
+            right: "-5%",
+            width: "40vw",
+            height: "45vh",
+            borderRadius: "45% 55% 50% 40%",
+            background: "radial-gradient(ellipse at center, #DDD6FE 0%, transparent 70%)",
+            opacity: 0.25,
+            filter: "blur(140px)",
+          }}
+        />
+        {/* Mid-right blob */}
+        <div
+          className="absolute"
+          style={{
+            top: "45%",
+            right: "-8%",
+            width: "35vw",
+            height: "40vh",
+            borderRadius: "50% 45% 40% 55%",
+            background: "radial-gradient(ellipse at center, #A78BFA 0%, transparent 70%)",
+            opacity: 0.2,
+            filter: "blur(150px)",
+          }}
+        />
+        {/* Bottom-center blob */}
+        <div
+          className="absolute"
+          style={{
+            bottom: "-5%",
+            left: "30%",
+            width: "45vw",
+            height: "40vh",
+            borderRadius: "40% 50% 45% 55%",
+            background: "radial-gradient(ellipse at center, #DDD6FE 0%, transparent 70%)",
+            opacity: 0.22,
+            filter: "blur(170px)",
+          }}
+        />
+        {/* Extra subtle center-left overlap */}
+        <div
+          className="absolute"
+          style={{
+            top: "55%",
+            left: "5%",
+            width: "30vw",
+            height: "35vh",
+            borderRadius: "55% 40% 50% 45%",
+            background: "radial-gradient(ellipse at center, #C4B5FD 0%, transparent 70%)",
+            opacity: 0.18,
+            filter: "blur(180px)",
+          }}
+        />
+      </div>
       {/* ── Hero ─────────────────────────────────────── */}
       <section className="space-y-6 sm:space-y-8">
         <div className="flex items-start gap-4 sm:gap-8">
@@ -177,7 +253,7 @@ export function PublicPortfolioPage() {
               <h2 className="type-headline-md sm:type-headline-lg text-on-surface">
                 プロジェクト
               </h2>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                 {data.projects.map((p, i) => (
                   <ProjectCard
                     key={p.id}
@@ -198,7 +274,7 @@ export function PublicPortfolioPage() {
             }}
           >
             {selectedProject && selectedIndex !== null && (
-              <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col p-0">
+              <DialogContent className="sm:max-w-5xl max-h-[85vh] flex flex-col p-0">
                 <DialogHeader className="shrink-0 p-4 sm:p-6 pb-0 sm:pb-0 pr-12">
                   <DialogTitle className="type-headline-sm sm:type-headline-lg text-on-surface">
                     {selectedProject.title}
@@ -211,65 +287,65 @@ export function PublicPortfolioPage() {
                 </DialogHeader>
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4">
                   <ProjectModalBody project={selectedProject} />
-
-                  {/* ── Prev / Next Navigation ── */}
-                  {data.projects.length > 1 && (
-                    <div
-                      className="flex items-center justify-between mt-8 pt-6"
-                      style={{
-                        borderTop: "1px solid var(--surface-container-high)",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={goToPrev}
-                        disabled={selectedIndex === 0}
-                        className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="m15 18-6-6 6-6" />
-                        </svg>
-                        前へ
-                      </button>
-
-                      <span className="type-label-sm text-on-surface-variant">
-                        {selectedIndex + 1} / {data.projects.length}
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={goToNext}
-                        disabled={selectedIndex === data.projects.length - 1}
-                        className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
-                      >
-                        次へ
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="m9 18 6-6-6-6" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
                 </div>
+
+                {/* ── Prev / Next Navigation (sticky footer) ── */}
+                {data.projects.length > 1 && (
+                  <div
+                    className="shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 border-t"
+                    style={{
+                      borderColor: "var(--surface-container-high)",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={goToPrev}
+                      disabled={selectedIndex === 0}
+                      className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="m15 18-6-6 6-6" />
+                      </svg>
+                      前へ
+                    </button>
+
+                    <span className="type-label-sm text-on-surface-variant">
+                      {selectedIndex + 1} / {data.projects.length}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={goToNext}
+                      disabled={selectedIndex === data.projects.length - 1}
+                      className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
+                    >
+                      次へ
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="m9 18 6-6-6-6" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
               </DialogContent>
             )}
           </Dialog>
@@ -541,7 +617,7 @@ function ProjectModalBody({ project: p }: { project: Project }) {
   return (
     <div className="space-y-8 pt-2">
       {p.thumbnailUrl && (
-        <div className="aspect-[16/9] rounded-xl overflow-hidden">
+        <div className="rounded-xl overflow-hidden max-h-64 sm:max-h-80">
           <img
             src={p.thumbnailUrl}
             alt={p.title}
@@ -917,19 +993,20 @@ function SkillDetailList({ scores, subSkillScores }: { scores: SkillScores; subS
   };
 
   return (
-    <div className="flex-1 w-full space-y-3">
-      {/* 5軸バー：常に上部に表示 */}
-      <div className="space-y-2">
-        {SKILL_AXES.map((axis) => (
+    <div className="flex-1 w-full space-y-2">
+      {SKILL_AXES.map((axis) => (
+        <div
+          key={axis.key}
+          className={`rounded-xl border transition-colors bg-white ${
+            expandedAxes[axis.key]
+              ? "border-primary/30"
+              : "border-outline-variant hover:bg-surface-container-low"
+          }`}
+        >
           <button
-            key={axis.key}
             type="button"
             onClick={() => toggleAxis(axis.key)}
-            className={`flex items-center gap-2 w-full px-4 py-3 rounded-xl border bg-surface transition-colors ${
-              expandedAxes[axis.key]
-                ? "border-primary/30 bg-primary/5"
-                : "border-outline-variant hover:bg-surface-container-low"
-            }`}
+            className="flex items-center gap-2 w-full px-4 py-3"
           >
             <span className="type-label-md text-on-surface shrink-0 w-28 sm:w-40 text-left">
               {axis.label}
@@ -951,15 +1028,8 @@ function SkillDetailList({ scores, subSkillScores }: { scores: SkillScores; subS
             </span>
             <span className={`text-on-surface-variant transition-transform text-xs ${expandedAxes[axis.key] ? "rotate-180" : ""}`}>▼</span>
           </button>
-        ))}
-      </div>
-
-      {/* 展開された詳細：軸バーの下に表示 */}
-      {SKILL_AXES.map((axis) =>
-        expandedAxes[axis.key] ? (
-          <div key={axis.key} className="space-y-1.5">
-            <h3 className="type-label-md text-on-surface font-semibold px-1">{axis.label}</h3>
-            <div className="rounded-xl border border-outline-variant/50 bg-surface-container divide-y divide-outline-variant/30">
+          {expandedAxes[axis.key] && (
+            <div className="border-t border-outline-variant/30 divide-y divide-outline-variant/30">
               {axis.subSkills.map((sub) => {
                 const level = subSkillScores?.[sub.key] ?? 0;
                 const levelDesc = level > 0 ? sub.levels[level - 1] : null;
@@ -988,9 +1058,9 @@ function SkillDetailList({ scores, subSkillScores }: { scores: SkillScores; subS
                 );
               })}
             </div>
-          </div>
-        ) : null
-      )}
+          )}
+        </div>
+      ))}
     </div>
   );
 }

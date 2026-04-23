@@ -178,6 +178,21 @@ export function DesignerDetailPage() {
             </button>
           </div>
 
+          {/* 公開の説明 */}
+          <div className="rounded-lg bg-surface-container px-4 py-3 space-y-1.5">
+            <p className="type-body-sm text-on-surface-variant">公開すると以下の状態になります：</p>
+            <ul className="space-y-1">
+              <li className="type-body-sm text-on-surface-variant flex items-start gap-2">
+                <span className="mt-1.5 h-1 w-1 rounded-full bg-on-surface-variant shrink-0" />
+                Web検索（Googleなど）の結果に表示されます
+              </li>
+              <li className="type-body-sm text-on-surface-variant flex items-start gap-2">
+                <span className="mt-1.5 h-1 w-1 rounded-full bg-on-surface-variant shrink-0" />
+                JOOi上の企業があなたのポートフォリオを閲覧できます
+              </li>
+            </ul>
+          </div>
+
           {/* URL */}
           <div className="flex items-center gap-2">
             <span className="type-body-sm text-on-surface-variant shrink-0">公開URL:</span>
@@ -340,21 +355,7 @@ export function DesignerDetailPage() {
 
           {/* ── Skill Radar Chart (collapsible) ──────────── */}
           {data.skillScores && (
-            <SkillRadarSection scores={data.skillScores} subSkillScores={data.subSkillScores} />
-          )}
-
-          {/* ── Skill Check Link ──────────────────────────── */}
-          {mode === "view" && (
-            <div className="flex justify-center">
-              <Link to={`/designers/${data.id}/skill-check`}>
-                <Button
-                  variant="outline"
-                  className="rounded-full border-primary text-primary hover:bg-primary/8 type-label-md px-6"
-                >
-                  スキル診断を受ける
-                </Button>
-              </Link>
-            </div>
+            <SkillRadarSection scores={data.skillScores} subSkillScores={data.subSkillScores} designerId={data.id} showCheckLink={mode === "view"} />
           )}
 
           {/* ── Full Empty State ──────────────────────────── */}
@@ -411,15 +412,8 @@ export function DesignerDetailPage() {
                 }}
               >
                 {selectedProject && (
-                  <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col p-0">
+                  <DialogContent className="sm:max-w-5xl max-h-[85vh] flex flex-col p-0">
                     <DialogHeader className="shrink-0 p-4 sm:p-6 pb-0 sm:pb-0 pr-12">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="inline-flex items-center gap-1 rounded-md bg-surface-container-high px-2 py-0.5 type-label-sm text-on-surface-variant">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                          Proto Design
-                        </span>
-                        <ShareUrlButton slug={data?.slug} designerId={data?.id} />
-                      </div>
                       <DialogTitle className="type-headline-sm sm:type-headline-lg text-on-surface">
                         {selectedProject.title}
                       </DialogTitle>
@@ -431,77 +425,77 @@ export function DesignerDetailPage() {
                     </DialogHeader>
                     <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4">
                       <ProjectModalBody project={selectedProject} />
-
-                      {/* ── Prev / Next Navigation ── */}
-                      {projectList.length > 1 && (
-                        <div
-                          className="flex items-center justify-between mt-8 pt-6"
-                          style={{
-                            borderTop: "1px solid var(--surface-container-high)",
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setSelectedProjectIndex((i) =>
-                                i !== null && i > 0 ? i - 1 : i
-                              )
-                            }
-                            disabled={selectedProjectIndex === 0}
-                            className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="m15 18-6-6 6-6" />
-                            </svg>
-                            前へ
-                          </button>
-
-                          <span className="type-label-sm text-on-surface-variant">
-                            {selectedProjectIndex! + 1} / {projectList.length}
-                          </span>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setSelectedProjectIndex((i) =>
-                                i !== null && i < projectList.length - 1
-                                  ? i + 1
-                                  : i
-                              )
-                            }
-                            disabled={
-                              selectedProjectIndex === projectList.length - 1
-                            }
-                            className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
-                          >
-                            次へ
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="m9 18 6-6-6-6" />
-                            </svg>
-                          </button>
-                        </div>
-                      )}
                     </div>
+
+                    {/* ── Prev / Next Navigation (sticky footer) ── */}
+                    {projectList.length > 1 && (
+                      <div
+                        className="shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 border-t"
+                        style={{
+                          borderColor: "var(--surface-container-high)",
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedProjectIndex((i) =>
+                              i !== null && i > 0 ? i - 1 : i
+                            )
+                          }
+                          disabled={selectedProjectIndex === 0}
+                          className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="m15 18-6-6 6-6" />
+                          </svg>
+                          前へ
+                        </button>
+
+                        <span className="type-label-sm text-on-surface-variant">
+                          {selectedProjectIndex! + 1} / {projectList.length}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedProjectIndex((i) =>
+                              i !== null && i < projectList.length - 1
+                                ? i + 1
+                                : i
+                            )
+                          }
+                          disabled={
+                            selectedProjectIndex === projectList.length - 1
+                          }
+                          className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
+                        >
+                          次へ
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="m9 18 6-6-6-6" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                   </DialogContent>
                 )}
               </Dialog>
@@ -662,8 +656,8 @@ export function DesignerDetailPage() {
             </Button>
           </section>
 
-          {/* ── Floating Action Bar ──────────────────────── */}
-          <div className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-outline-variant/30">
+          {/* ── Action Bar ──────────────────────── */}
+          <div className="border-t border-outline-variant/30">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
               <p className="type-body-sm text-on-surface-variant hidden sm:block">
                 変更を確認して保存してください
@@ -829,8 +823,8 @@ export function DesignerDetailPage() {
             </div>
           </section>
 
-          {/* ── Floating Action Bar (Confirm) ────────────── */}
-          <div className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-outline-variant/30">
+          {/* ── Action Bar (Confirm) ────────────── */}
+          <div className="border-t border-outline-variant/30">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
               <p className="type-body-sm text-on-surface-variant hidden sm:block">
                 内容に問題はありませんか？
@@ -1716,43 +1710,6 @@ function ProjectCard({
 
 /* ── Share URL Button ───────────────────────────────────── */
 
-function ShareUrlButton({ slug, designerId }: { slug?: string | null; designerId?: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const publicPath = slug ? `/p/${slug}` : designerId ? `/designers/${designerId}` : null;
-  if (!publicPath) return null;
-
-  const fullUrl = `${window.location.origin}${publicPath}`;
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(fullUrl).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 type-label-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"
-      title={fullUrl}
-    >
-      {copied ? (
-        <>
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          コピー済み
-        </>
-      ) : (
-        <>
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-          URLをコピー
-        </>
-      )}
-    </button>
-  );
-}
-
 /* ── Project Modal Body ──────────────────────────────────── */
 
 function ProjectModalBody({ project: p }: { project: Project }) {
@@ -2145,13 +2102,25 @@ const SKILL_AXES: {
   },
 ];
 
-function SkillRadarSection({ scores, subSkillScores }: { scores: SkillScores; subSkillScores: SubSkillScores | null }) {
+function SkillRadarSection({ scores, subSkillScores, designerId, showCheckLink }: { scores: SkillScores; subSkillScores: SubSkillScores | null; designerId: string; showCheckLink?: boolean }) {
   return (
     <section className="rounded-2xl border border-outline-variant bg-surface-container-low p-6 sm:p-8 space-y-6 sm:space-y-8">
       <h2 className="type-headline-md sm:type-headline-lg text-on-surface">
         スキル診断
       </h2>
       <SkillRadarChart scores={scores} subSkillScores={subSkillScores} />
+      {showCheckLink && (
+        <div className="flex justify-center">
+          <Link to={`/designers/${designerId}/skill-check`}>
+            <Button
+              variant="outline"
+              className="rounded-full border-primary text-primary hover:bg-primary/8 type-label-md px-6"
+            >
+              スキル診断を受ける
+            </Button>
+          </Link>
+        </div>
+      )}
     </section>
   );
 }
@@ -2199,7 +2168,7 @@ function SkillRadarChart({ scores, subSkillScores }: { scores: SkillScores; subS
   });
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
+    <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-10">
       <div className="shrink-0">
         <svg viewBox="-10 -10 320 320" className="w-64 h-64 sm:w-72 sm:h-72">
           {gridPaths.map((points, i) => (
@@ -2296,19 +2265,20 @@ function SkillDetailList({ scores, subSkillScores }: { scores: SkillScores; subS
   };
 
   return (
-    <div className="flex-1 w-full space-y-3">
-      {/* 5軸バー：常に上部に表示 */}
-      <div className="space-y-2">
-        {SKILL_AXES.map((axis) => (
+    <div className="flex-1 w-full space-y-2">
+      {SKILL_AXES.map((axis) => (
+        <div
+          key={axis.key}
+          className={`rounded-xl border transition-colors bg-white ${
+            expandedAxes[axis.key]
+              ? "border-primary/30"
+              : "border-outline-variant hover:bg-surface-container-low"
+          }`}
+        >
           <button
-            key={axis.key}
             type="button"
             onClick={() => toggleAxis(axis.key)}
-            className={`flex items-center gap-2 w-full px-4 py-3 rounded-xl border bg-surface transition-colors ${
-              expandedAxes[axis.key]
-                ? "border-primary/30 bg-primary/5"
-                : "border-outline-variant hover:bg-surface-container-low"
-            }`}
+            className="flex items-center gap-2 w-full px-4 py-3"
           >
             <span className="type-label-md text-on-surface shrink-0 w-28 sm:w-40 text-left">
               {axis.label}
@@ -2330,36 +2300,24 @@ function SkillDetailList({ scores, subSkillScores }: { scores: SkillScores; subS
             </span>
             <span className={`text-on-surface-variant transition-transform text-xs ${expandedAxes[axis.key] ? "rotate-180" : ""}`}>▼</span>
           </button>
-        ))}
-      </div>
-
-      {/* 展開された詳細：軸バーの下に表示 */}
-      {SKILL_AXES.map((axis) =>
-        expandedAxes[axis.key] ? (
-          <div key={axis.key} className="space-y-1.5">
-            <h3 className="type-label-md text-on-surface font-semibold px-1">{axis.label}</h3>
-            <div className="rounded-xl border border-outline-variant/50 bg-surface-container divide-y divide-outline-variant/30">
+          {expandedAxes[axis.key] && (
+            <div className="border-t border-outline-variant/30 divide-y divide-outline-variant/30">
               {axis.subSkills.map((sub) => {
                 const level = subSkillScores?.[sub.key] ?? null;
                 return (
-                  <div
-                    key={sub.key}
-                    className="flex items-start gap-2 px-4 py-2.5"
-                  >
+                  <div key={sub.key} className="flex items-start gap-2 px-4 py-2.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary/50 shrink-0 mt-1.5" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="type-label-sm text-on-surface">
-                          {sub.name}
-                        </span>
+                    <div>
+                      <span className="type-label-sm text-on-surface">
+                        {sub.name}
                         {level !== null && (
-                          <span className="type-label-sm text-primary font-semibold">
+                          <span className="ml-2 type-label-sm text-primary font-semibold">
                             Lv.{level}
                           </span>
                         )}
-                      </div>
+                      </span>
                       {level !== null && (
-                        <p className="type-body-sm text-on-surface-variant">
+                        <p className="type-body-sm text-on-surface-variant mt-0.5">
                           {sub.levels[level - 1]}
                         </p>
                       )}
@@ -2368,9 +2326,9 @@ function SkillDetailList({ scores, subSkillScores }: { scores: SkillScores; subS
                 );
               })}
             </div>
-          </div>
-        ) : null
-      )}
+          )}
+        </div>
+      ))}
     </div>
   );
 }
