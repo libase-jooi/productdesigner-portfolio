@@ -2,11 +2,13 @@ import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
 
 type UploadMethod = "pdf" | "url";
 
 export function UploadPage() {
   const navigate = useNavigate();
+  const { myDesigner } = useAuth();
   const [method, setMethod] = useState<UploadMethod>("pdf");
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState("");
@@ -213,7 +215,18 @@ export function UploadPage() {
       )}
 
       {/* Submit */}
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        {myDesigner ? (
+          <button
+            type="button"
+            onClick={() => navigate(`/admin/designers/${myDesigner.id}`)}
+            className="type-label-sm text-on-surface-variant hover:text-on-surface transition-colors"
+          >
+            ← プロフィールを編集する
+          </button>
+        ) : (
+          <div />
+        )}
         <Button
           disabled={!canSubmit}
           onClick={handleSubmit}

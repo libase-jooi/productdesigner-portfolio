@@ -128,6 +128,41 @@ export async function getDesignerById(id: string): Promise<DesignerWithRelations
   };
 }
 
+export async function updateDesigner(
+  id: string,
+  fields: {
+    name?: string;
+    status?: string;
+    sourceUrl?: string | null;
+    sourceType?: string | null;
+    profileImageUrl?: string | null;
+    bio?: string | null;
+    availabilityStatus?: string | null;
+    availabilityNote?: string | null;
+    socialLinks?: Record<string, string> | null;
+  }
+): Promise<Designer | null> {
+  const row: Record<string, unknown> = {};
+  if (fields.name !== undefined) row.name = fields.name;
+  if (fields.status !== undefined) row.status = fields.status;
+  if (fields.sourceUrl !== undefined) row.source_url = fields.sourceUrl;
+  if (fields.sourceType !== undefined) row.source_type = fields.sourceType;
+  if (fields.profileImageUrl !== undefined) row.profile_image_url = fields.profileImageUrl;
+  if (fields.bio !== undefined) row.bio = fields.bio;
+  if (fields.availabilityStatus !== undefined) row.availability_status = fields.availabilityStatus;
+  if (fields.availabilityNote !== undefined) row.availability_note = fields.availabilityNote;
+  if (fields.socialLinks !== undefined) row.social_links = fields.socialLinks;
+
+  const { data, error } = await supabase
+    .from("designers")
+    .update(row)
+    .eq("id", id)
+    .select()
+    .single();
+  if (error || !data) return null;
+  return mapDesigner(data);
+}
+
 export async function getDesignerByAuthUserId(
   authUserId: string
 ): Promise<DesignerWithRelations | null> {
