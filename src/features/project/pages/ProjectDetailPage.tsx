@@ -1,10 +1,20 @@
 import { useParams, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { getMockProject } from "@/api/mock";
+import { getProjectById } from "@/api/supabase";
+import type { Project, DesignerWithRelations } from "@/api/schema";
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
-  const result = getMockProject(projectId ?? "");
+  const [result, setResult] = useState<{ project: Project; designer: DesignerWithRelations } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!projectId) return;
+    getProjectById(projectId).then(setResult).finally(() => setLoading(false));
+  }, [projectId]);
+
+  if (loading) return <div className="py-20 text-center"><p className="type-body-md text-on-surface-variant">読み込み中...</p></div>;
 
   if (!result) {
     return (
@@ -27,7 +37,7 @@ export function ProjectDetailPage() {
         </Link>
         <span>/</span>
         <Link
-          to={`/designers/${d.id}`}
+          to={`/designers/${d.slug}`}
           className="hover:text-primary transition-colors"
         >
           {d.name}

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
-import { mockDesigners } from "@/api/mock";
+import { getDesigners } from "@/api/supabase";
 import type { DesignerWithRelations, Confidence } from "@/api/schema";
 
 /** AI入力の完了度を算出 */
@@ -52,7 +53,11 @@ function confidenceColor(c: Confidence) {
 }
 
 export function AdminDesignerListPage() {
-  const designers = mockDesigners;
+  const [designers, setDesigners] = useState<DesignerWithRelations[]>([]);
+
+  useEffect(() => {
+    getDesigners().then(setDesigners);
+  }, []);
 
   return (
     <div className="space-y-8">

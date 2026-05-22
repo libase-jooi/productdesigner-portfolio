@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { getMockDesigner } from "@/api/mock";
+import { getDesignerBySlug } from "@/api/supabase";
 import type {
   Project,
   WorkHistory,
@@ -22,10 +22,24 @@ import type {
 import { EmploymentType, PhaseTag, AvailabilityStatus } from "@/api/schema";
 
 export function ReviewPage() {
-  const { designerId } = useParams<{ designerId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const data = getMockDesigner(designerId ?? "d1");
-  const [isPublished, setIsPublished] = useState(data?.publishedAt !== null);
+  const [data, setData] = useState<DesignerWithRelations | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isPublished, setIsPublished] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
+
+  useEffect(() => {
+    if (!slug) return;
+    getDesignerBySlug(slug).then((d) => {
+      setData(d);
+      if (d) setIsPublished(d.publishedAt !== null);
+    }).finally(() => setLoading(false));
+  }, [slug]);
+
+  if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><p className="type-body-md text-on-surface-variant">読み込み中...</p></div>;
 
   if (!data) {
     return (
@@ -44,10 +58,6 @@ export function ReviewPage() {
   const highCount = allItems.filter((i) => i.confidence === "高").length;
   const total = allItems.length;
   const confidenceRate = total > 0 ? Math.round((highCount / total) * 100) : 0;
-
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
 
   const handleSave = () => {
     setSaving(true);

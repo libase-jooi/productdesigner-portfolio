@@ -40,9 +40,9 @@ export const router = createBrowserRouter([
     children: [
       { path: "dashboard", element: <DesignerListPage /> },
       { path: "upload/processing", element: <ProcessingPage /> },
-      { path: "upload/review/:designerId", element: <ReviewPage /> },
-      { path: "designers/:designerId", element: <DesignerDetailPage /> },
-      { path: "designers/:designerId/skill-check", element: <SkillCheckPage /> },
+      { path: "upload/review/:slug", element: <ReviewPage /> },
+      { path: "designers/:slug", element: <DesignerDetailPage /> },
+      { path: "designers/:slug/skill-check", element: <SkillCheckPage /> },
       { path: "portfolio/:slug", element: <DesignerDetailPage /> },
       { path: "projects/:projectId", element: <ProjectDetailPage /> },
     ],
