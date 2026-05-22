@@ -1,23 +1,26 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { mockDesigners } from "@/api/mock";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getCurrentDesigner } from "@/shared/hooks/useCurrentDesigner";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedDesignerId, setSelectedDesignerId] = useState(
-    getCurrentDesigner().id
-  );
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Proto: 選択したデザイナーとしてログイン
-    localStorage.setItem("jooi_current_designer_id", selectedDesignerId);
-    const designer = mockDesigners.find((d) => d.id === selectedDesignerId)!;
-    navigate(designer.slug ? `/portfolio/${designer.slug}` : "/dashboard");
+    setError(null);
+    setLoading(true);
+    const { error } = await signIn(email, password);
+    setLoading(false);
+    if (error) {
+      setError("メールアドレスまたはパスワードが正しくありません");
+      return;
+    }
+    navigate("/upload");
   };
 
   return (
@@ -38,44 +41,13 @@ export function LoginPage() {
           </p>
         </div>
 
-        {/* Proto: デザイナー選択 */}
-        <div className="rounded-xl bg-surface-container-low p-4 space-y-3">
-          <p className="type-label-md text-on-surface-variant text-center">
-            Proto: ログインするデザイナーを選択
-          </p>
-          <div className="space-y-2">
-            {mockDesigners.map((d) => (
-              <button
-                key={d.id}
-                type="button"
-                onClick={() => setSelectedDesignerId(d.id)}
-                className={`w-full flex items-center gap-3 rounded-lg p-3 transition-colors text-left ${
-                  selectedDesignerId === d.id
-                    ? "bg-primary/10 ring-2 ring-primary"
-                    : "hover:bg-surface-container"
-                }`}
-              >
-                <Avatar className="h-9 w-9 rounded-lg">
-                  <AvatarImage src={d.profileImageUrl ?? undefined} />
-                  <AvatarFallback className="rounded-lg bg-surface-container-high text-on-surface type-label-md">
-                    {d.name[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="type-label-md text-on-surface truncate">
-                    {d.name}
-                  </p>
-                  <p className="type-body-sm text-on-surface-variant">
-                    /{d.slug}
-                  </p>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <div className="rounded-xl bg-error-container p-3 text-center">
+              <p className="type-label-md text-on-error-container">{error}</p>
+            </div>
+          )}
           <div>
             <label className="type-label-md text-on-surface block mb-1.5">
               メールアドレス
@@ -109,9 +81,10 @@ export function LoginPage() {
 
           <button
             type="submit"
-            className="w-full h-12 rounded-xl type-title-sm text-white gradient-primary transition-all hover:opacity-90 elevation-2"
+            disabled={loading}
+            className="w-full h-12 rounded-xl type-title-sm text-white gradient-primary transition-all hover:opacity-90 elevation-2 disabled:opacity-60"
           >
-            ログイン
+            {loading ? "ログイン中..." : "ログイン"}
           </button>
         </form>
 

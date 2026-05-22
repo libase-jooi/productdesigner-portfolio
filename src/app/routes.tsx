@@ -11,6 +11,7 @@ import { DesignerDetailPage } from "@/features/designer/pages/DesignerDetailPage
 import { PublicPortfolioPage } from "@/features/designer/pages/PublicPortfolioPage";
 import { ProjectDetailPage } from "@/features/project/pages/ProjectDetailPage";
 import { SkillCheckPage } from "@/features/designer/pages/SkillCheckPage";
+import { UploadPage } from "@/features/upload/pages/UploadPage";
 import { ProcessingPage } from "@/features/upload/pages/ProcessingPage";
 import { ReviewPage } from "@/features/upload/pages/ReviewPage";
 import { AdminDesignerListPage } from "@/features/designer/pages/AdminDesignerListPage";
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { path: "dashboard", element: <DesignerListPage /> },
+      { path: "upload", element: <UploadPage /> },
       { path: "upload/processing", element: <ProcessingPage /> },
       { path: "upload/review/:slug", element: <ReviewPage /> },
       { path: "designers/:slug", element: <DesignerDetailPage /> },

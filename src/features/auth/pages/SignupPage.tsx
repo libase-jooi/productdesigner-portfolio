@@ -1,17 +1,32 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function SignupPage() {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"client" | "designer">("client");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // ダミー: 登録成功としてダッシュボードへ
-    navigate("/dashboard");
+    setError(null);
+    if (password.length < 8) {
+      setError("パスワードは8文字以上で入力してください");
+      return;
+    }
+    setLoading(true);
+    const { error } = await signUp(email, password);
+    setLoading(false);
+    if (error) {
+      setError("登録に失敗しました。入力内容を確認してください");
+      return;
+    }
+    navigate("/upload");
   };
 
   return (
@@ -60,6 +75,11 @@ export function SignupPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <div className="rounded-xl bg-error-container p-3 text-center">
+              <p className="type-label-md text-on-error-container">{error}</p>
+            </div>
+          )}
           <div>
             <label className="type-label-md text-on-surface block mb-1.5">
               {role === "designer" ? "氏名" : "会社名 / お名前"}
@@ -101,9 +121,10 @@ export function SignupPage() {
 
           <button
             type="submit"
-            className="w-full h-12 rounded-xl type-title-sm text-white gradient-primary transition-all hover:opacity-90 elevation-2"
+            disabled={loading}
+            className="w-full h-12 rounded-xl type-title-sm text-white gradient-primary transition-all hover:opacity-90 elevation-2 disabled:opacity-60"
           >
-            アカウントを作成
+            {loading ? "登録中..." : "アカウントを作成"}
           </button>
 
           <p className="type-label-sm text-on-surface-variant text-center">
