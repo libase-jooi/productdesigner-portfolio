@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, Outlet, ScrollRestoration, useNavigate, useSearchParams } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useCurrentDesigner } from "@/shared/hooks/useCurrentDesigner";
+import { useAuth } from "@/contexts/AuthContext";
 import { OnboardingDialog } from "@/shared/components/OnboardingDialog";
 import { UploadDialog } from "@/features/upload/components/UploadDialog";
 
@@ -12,6 +13,7 @@ function designerUrl(d: { id: string; slug: string | null }) {
 export function PublicLayout() {
   const navigate = useNavigate();
   const { designer, allDesigners, switchDesigner } = useCurrentDesigner();
+  const { signOut } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const onboardingOpen = searchParams.has("guide");
@@ -73,6 +75,12 @@ export function PublicLayout() {
             >
               Admin
             </Link>
+            <button
+              onClick={async () => { await signOut(); navigate("/login"); }}
+              className="type-label-sm text-on-surface-variant/50 hover:text-error transition-colors"
+            >
+              ログアウト
+            </button>
 
             {/* デザイナー切り替え（Proto） */}
             <div className="relative" ref={switcherRef}>
