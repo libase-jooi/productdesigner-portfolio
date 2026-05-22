@@ -20,7 +20,7 @@ export function SignupPage() {
       return;
     }
     setLoading(true);
-    const { error } = await signUp(email, password);
+    const { error } = await signUp(email, password, name);
     setLoading(false);
     if (error) {
       setError("登録に失敗しました。入力内容を確認してください");
