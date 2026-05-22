@@ -75,6 +75,12 @@ export function PublicLayout() {
             >
               Admin
             </Link>
+            <Link
+              to="/my/edit"
+              className="type-label-sm text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+            >
+              マイページ
+            </Link>
             <button
               onClick={async () => { await signOut(); navigate("/login"); }}
               className="type-label-sm text-on-surface-variant/50 hover:text-error transition-colors"

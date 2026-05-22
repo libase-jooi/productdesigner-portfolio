@@ -16,6 +16,7 @@ import { ProcessingPage } from "@/features/upload/pages/ProcessingPage";
 import { ReviewPage } from "@/features/upload/pages/ReviewPage";
 import { AdminDesignerListPage } from "@/features/designer/pages/AdminDesignerListPage";
 import { AdminDesignerEditPage } from "@/features/designer/pages/AdminDesignerEditPage";
+import { MyEditPage } from "@/features/designer/pages/MyEditPage";
 import { RequireAuth } from "@/shared/components/RequireAuth";
 
 export const router = createBrowserRouter([
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
     element: <RequireAuth><PublicLayout /></RequireAuth>,
     children: [
       { path: "dashboard", element: <DesignerListPage /> },
+      { path: "my/edit", element: <MyEditPage /> },
       { path: "upload", element: <UploadPage /> },
       { path: "upload/processing", element: <ProcessingPage /> },
       { path: "upload/review/:slug", element: <ReviewPage /> },
