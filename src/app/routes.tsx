@@ -16,6 +16,7 @@ import { ProcessingPage } from "@/features/upload/pages/ProcessingPage";
 import { ReviewPage } from "@/features/upload/pages/ReviewPage";
 import { AdminDesignerListPage } from "@/features/designer/pages/AdminDesignerListPage";
 import { AdminDesignerEditPage } from "@/features/designer/pages/AdminDesignerEditPage";
+import { RequireAuth } from "@/shared/components/RequireAuth";
 
 export const router = createBrowserRouter([
   // LP（ランディングページ）
@@ -37,7 +38,7 @@ export const router = createBrowserRouter([
   },
   // ポートフォリオ編集（ログイン後）
   {
-    element: <PublicLayout />,
+    element: <RequireAuth><PublicLayout /></RequireAuth>,
     children: [
       { path: "dashboard", element: <DesignerListPage /> },
       { path: "upload", element: <UploadPage /> },
