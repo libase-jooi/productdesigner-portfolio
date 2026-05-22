@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { Progress } from "@/components/ui/progress";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { getMockDesigner } from "@/api/mock";
+import { getDesignerById } from "@/api/supabase";
 import type {
   Project,
   WorkHistory,
@@ -25,7 +25,15 @@ import {
 
 export function AdminDesignerEditPage() {
   const { designerId } = useParams<{ designerId: string }>();
-  const data = getMockDesigner(designerId ?? "");
+  const [data, setData] = useState<DesignerWithRelations | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!designerId) return;
+    getDesignerById(designerId).then(setData).finally(() => setLoading(false));
+  }, [designerId]);
+
+  if (loading) return <div className="p-8 text-on-surface-variant">読み込み中...</div>;
 
   if (!data) {
     return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
 import { EmptyState } from "@/shared/components/EmptyState";
 import { UploadDialog } from "@/features/upload/components/UploadDialog";
 import { SkillChatPanel, SkillChatToggle } from "@/features/designer/components/SkillChatPanel";
-import { getMockDesigner, getMockDesignerBySlug } from "@/api/mock";
+import { getDesignerBySlug } from "@/api/supabase";
 import type { Project, WorkHistory, SocialLinks, SkillScores, SubSkillScores } from "@/api/schema";
 import { EmploymentType, PhaseTag, AvailabilityStatus } from "@/api/schema";
 
@@ -28,13 +28,9 @@ function getPageMode(searchParams: URLSearchParams): PageMode {
 }
 
 export function DesignerDetailPage() {
-  const { designerId, slug } = useParams<{
-    designerId?: string;
-    slug?: string;
-  }>();
-  const data = slug
-    ? getMockDesignerBySlug(slug)
-    : getMockDesigner(designerId ?? "");
+  const { slug } = useParams<{ slug: string }>();
+  const [data, setData] = useState<import("@/api/schema").DesignerWithRelations | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const mode = getPageMode(searchParams);
@@ -47,13 +43,28 @@ export function DesignerDetailPage() {
     setSearchParams(searchParams, { replace: true });
   };
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [isPublished, setIsPublished] = useState(data?.publishedAt !== null);
+  const [isPublished, setIsPublished] = useState(false);
   const [editingSlug, setEditingSlug] = useState(false);
-  const [slugValue, setSlugValue] = useState(data?.slug ?? "");
-  const [workHistoryList, setWorkHistoryList] = useState<WorkHistory[]>(data?.workHistory ?? []);
-  const [projectList, setProjectList] = useState<Project[]>(data?.projects ?? []);
+  const [slugValue, setSlugValue] = useState("");
+  const [workHistoryList, setWorkHistoryList] = useState<WorkHistory[]>([]);
+  const [projectList, setProjectList] = useState<Project[]>([]);
   const [selectedProjectIndex, setSelectedProjectIndex] = useState<number | null>(null);
   const [chatOpen, setChatOpen] = useState(false);
+
+  useEffect(() => {
+    if (!slug) return;
+    getDesignerBySlug(slug).then((d) => {
+      setData(d);
+      if (d) {
+        setIsPublished(d.publishedAt !== null);
+        setSlugValue(d.slug ?? "");
+        setWorkHistoryList(d.workHistory);
+        setProjectList(d.projects);
+      }
+    }).finally(() => setLoading(false));
+  }, [slug]);
+
+  if (loading) return <div className="flex min-h-screen items-center justify-center"><p className="type-body-md text-on-surface-variant">読み込み中...</p></div>;
   const selectedProject =
     selectedProjectIndex !== null ? projectList[selectedProjectIndex] ?? null : null;
 
@@ -370,7 +381,7 @@ export function DesignerDetailPage() {
 
           {/* ── Skill Radar Chart (collapsible) ──────────── */}
           {data.skillScores && (
-            <SkillRadarSection scores={data.skillScores} subSkillScores={data.subSkillScores} designerId={data.id} showCheckLink={mode === "view"} />
+            <SkillRadarSection scores={data.skillScores} subSkillScores={data.subSkillScores} designerSlug={data.slug ?? ""} showCheckLink={mode === "view"} />
           )}
 
           {/* ── Full Empty State ──────────────────────────── */}
@@ -2117,7 +2128,7 @@ const SKILL_AXES: {
   },
 ];
 
-function SkillRadarSection({ scores, subSkillScores, designerId, showCheckLink }: { scores: SkillScores; subSkillScores: SubSkillScores | null; designerId: string; showCheckLink?: boolean }) {
+function SkillRadarSection({ scores, subSkillScores, designerSlug, showCheckLink }: { scores: SkillScores; subSkillScores: SubSkillScores | null; designerSlug: string; showCheckLink?: boolean }) {
   return (
     <section className="rounded-2xl border border-outline-variant bg-surface-container-low p-6 sm:p-8 space-y-6 sm:space-y-8">
       <h2 className="type-headline-md sm:type-headline-lg text-on-surface">
@@ -2126,7 +2137,7 @@ function SkillRadarSection({ scores, subSkillScores, designerId, showCheckLink }
       <SkillRadarChart scores={scores} subSkillScores={subSkillScores} />
       {showCheckLink && (
         <div className="flex justify-center">
-          <Link to={`/designers/${designerId}/skill-check`}>
+          <Link to={`/designers/${designerSlug}/skill-check`}>
             <Button
               variant="outline"
               className="rounded-full border-primary text-primary hover:bg-primary/8 type-label-md px-6"

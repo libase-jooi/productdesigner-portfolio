@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,14 +10,22 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { getMockDesignerBySlug } from "@/api/mock";
-import type { Project, WorkHistory, SocialLinks, SkillScores, SubSkillScores } from "@/api/schema";
+import { getDesignerBySlug } from "@/api/supabase";
+import type { DesignerWithRelations, Project, WorkHistory, SocialLinks, SkillScores, SubSkillScores } from "@/api/schema";
 
 export function PublicPortfolioPage() {
   const { slug } = useParams<{ slug: string }>();
-  const data = getMockDesignerBySlug(slug ?? "");
+  const [data, setData] = useState<DesignerWithRelations | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!slug) return;
+    getDesignerBySlug(slug).then(setData).finally(() => setLoading(false));
+  }, [slug]);
 
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><p className="type-body-md text-on-surface-variant">読み込み中...</p></div>;
 
   if (!data) {
     return (

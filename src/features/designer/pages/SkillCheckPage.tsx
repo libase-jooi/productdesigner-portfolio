@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { getMockDesigner } from "@/api/mock";
+import { getDesignerBySlug } from "@/api/supabase";
+import type { DesignerWithRelations } from "@/api/schema";
 import type { SkillScores } from "@/api/schema";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -383,20 +384,38 @@ const SKILL_AXES: AxisDef[] = [
    ═══════════════════════════════════════════════════════════════ */
 
 export function SkillCheckPage() {
-  const { designerId } = useParams<{ designerId: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const data = getMockDesigner(designerId ?? "");
+  const [data, setData] = useState<DesignerWithRelations | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Initialize sub-skill scores from existing data or default to 0 (unselected)
   const [scores, setScores] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
     for (const axis of SKILL_AXES) {
       for (const sub of axis.subSkills) {
-        initial[sub.key] = data?.subSkillScores?.[sub.key] ?? 0;
+        initial[sub.key] = 0;
       }
     }
     return initial;
   });
+
+  useEffect(() => {
+    if (!slug) return;
+    getDesignerBySlug(slug).then((d) => {
+      setData(d);
+      if (d?.subSkillScores) {
+        setScores((prev) => {
+          const updated = { ...prev };
+          for (const axis of SKILL_AXES) {
+            for (const sub of axis.subSkills) {
+              updated[sub.key] = d.subSkillScores?.[sub.key] ?? 0;
+            }
+          }
+          return updated;
+        });
+      }
+    }).finally(() => setLoading(false));
+  }, [slug]);
 
   const setScore = (key: string, level: number) => {
     setScores((prev) => ({ ...prev, [key]: level }));
@@ -417,9 +436,10 @@ export function SkillCheckPage() {
     console.log("skillScores:", axisScores);
     console.log("subSkillScores:", scores);
 
-    navigate(`/designers/${designerId}`);
+    navigate(`/designers/${slug}`);
   };
 
+  if (loading) return <div className="p-8 text-on-surface-variant">読み込み中...</div>;
   if (!data) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
