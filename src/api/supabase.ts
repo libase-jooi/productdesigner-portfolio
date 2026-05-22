@@ -128,6 +128,38 @@ export async function getDesignerById(id: string): Promise<DesignerWithRelations
   };
 }
 
+export async function getDesignerByAuthUserId(
+  authUserId: string
+): Promise<DesignerWithRelations | null> {
+  const { data, error } = await supabase
+    .from("designers")
+    .select("*, projects(*), work_history(*)")
+    .eq("auth_user_id", authUserId)
+    .single();
+  if (error || !data) return null;
+  return {
+    ...mapDesigner(data),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    projects: (data.projects as any[] ?? []).map(mapProject),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    workHistory: (data.work_history as any[] ?? []).map(mapWorkHistory),
+  };
+}
+
+export async function createDesigner(
+  name: string,
+  authUserId: string
+): Promise<Designer | null> {
+  const { data, error } = await supabase
+    .from("designers")
+    .insert({ name, auth_user_id: authUserId })
+    .select()
+    .single();
+  if (error) return null;
+  if (!data) return null;
+  return mapDesigner(data);
+}
+
 export async function getProjectById(
   id: string
 ): Promise<{ project: Project; designer: DesignerWithRelations } | null> {
