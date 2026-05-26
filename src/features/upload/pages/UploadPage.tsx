@@ -23,7 +23,7 @@ export function UploadPage() {
     const sourceType = method === "pdf" ? "pdf" : "url";
     const sourceName = method === "pdf" ? file!.name : url;
     navigate("/upload/processing", {
-      state: { sourceType, sourceName },
+      state: { sourceType, sourceName, file: method === "pdf" ? file : null, url: method === "url" ? url : null },
     });
   };
 

@@ -237,6 +237,20 @@ export async function setDesignerPublished(
   return mapDesigner(data);
 }
 
+export async function analyzePortfolio(params: {
+  type: "pdf" | "url";
+  content?: string;
+  url?: string;
+  designerId: string;
+}): Promise<{ slug: string } | { error: string }> {
+  const { data, error } = await supabase.functions.invoke("analyze-portfolio", {
+    body: params,
+  });
+  if (error) return { error: error.message };
+  if (data?.error) return { error: data.error };
+  return { slug: data.slug };
+}
+
 export async function getProjectById(
   id: string
 ): Promise<{ project: Project; designer: DesignerWithRelations } | null> {
