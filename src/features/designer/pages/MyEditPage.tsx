@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { getDesignerById, updateDesigner } from "@/api/supabase";
+import { getDesignerById, updateDesigner, uploadProfileImage } from "@/api/supabase";
 import type { DesignerWithRelations } from "@/api/schema";
 import { AvailabilityStatus } from "@/api/schema";
 
@@ -46,14 +46,17 @@ function initDraft(d: DesignerWithRelations): Draft {
 
 export function MyEditPage() {
   const navigate = useNavigate();
-  const { myDesigner } = useAuth();
+  const { myDesigner, loading: authLoading } = useAuth();
   const [designer, setDesigner] = useState<DesignerWithRelations | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [saveMsg, setSaveMsg] = useState<"success" | "error" | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!myDesigner) {
       navigate("/upload");
       return;
@@ -62,7 +65,7 @@ export function MyEditPage() {
       setDesigner(d);
       if (d) setDraft(initDraft(d));
     }).finally(() => setLoading(false));
-  }, [myDesigner, navigate]);
+  }, [myDesigner, authLoading, navigate]);
 
   const handleSave = async () => {
     if (!draft || !myDesigner) return;
@@ -70,7 +73,7 @@ export function MyEditPage() {
     const socialLinks = Object.fromEntries(
       Object.entries(draft.socialLinks).filter(([, v]) => v !== "")
     );
-    const result = await updateDesigner(myDesigner.id, {
+    const result = await updateDesigner(designer.id, {
       name: draft.name,
       profileImageUrl: draft.profileImageUrl || null,
       bio: draft.bio || null,
@@ -85,6 +88,24 @@ export function MyEditPage() {
 
   if (loading) return <div className="p-8 text-on-surface-variant">読み込み中...</div>;
   if (!designer || !draft) return null;
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !designer) return;
+    setUploading(true);
+    try {
+      const url = await uploadProfileImage(file, designer.id);
+      if (url) {
+        set("profileImageUrl", url);
+      } else {
+        setSaveMsg("error");
+        setTimeout(() => setSaveMsg(null), 3000);
+      }
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const set = (key: keyof Omit<Draft, "socialLinks">, value: string) =>
     setDraft((d) => d ? { ...d, [key]: value } : d);
@@ -106,22 +127,41 @@ export function MyEditPage() {
         <h2 className="type-title-md text-on-surface">基本情報</h2>
 
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden shrink-0">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="relative h-16 w-16 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden shrink-0 hover:opacity-80 transition-opacity group"
+          >
             {draft.profileImageUrl ? (
-              <img src={draft.profileImageUrl} alt="" className="h-full w-full object-cover" />
+              <img
+                src={draft.profileImageUrl}
+                alt=""
+                className="h-full w-full object-cover"
+                onError={(e) => { e.currentTarget.style.display = "none"; }}
+              />
             ) : (
               <span className="type-headline-sm text-on-surface-variant">{draft.name[0]}</span>
             )}
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
+              {uploading ? (
+                <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+              )}
+            </div>
+          </button>
+          <div>
+            <p className="type-label-sm text-on-surface-variant">プロフィール画像</p>
+            <p className="type-body-sm text-on-surface-variant/60 mt-0.5">クリックして画像を選択</p>
           </div>
-          <div className="flex-1">
-            <label className="type-label-sm text-on-surface-variant block mb-1.5">プロフィール画像URL</label>
-            <Input
-              value={draft.profileImageUrl}
-              onChange={(e) => set("profileImageUrl", e.target.value)}
-              placeholder="https://..."
-              className="bg-surface-container-high border-none rounded-lg h-10 type-body-md text-on-surface"
-            />
-          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
         </div>
 
         <div className="space-y-1.5">

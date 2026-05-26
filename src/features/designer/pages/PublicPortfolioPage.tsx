@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -10,20 +10,37 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { getDesignerBySlug } from "@/api/supabase";
+import { getDesignerBySlug, setDesignerPublished } from "@/api/supabase";
 import type { DesignerWithRelations, Project, WorkHistory, SocialLinks, SkillScores, SubSkillScores } from "@/api/schema";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function PublicPortfolioPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { myDesigner } = useAuth();
+  const navigate = useNavigate();
   const [data, setData] = useState<DesignerWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const [published, setPublished] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
-    getDesignerBySlug(slug).then(setData).finally(() => setLoading(false));
+    getDesignerBySlug(slug).then((d) => {
+      setData(d);
+      if (d) setPublished(!!d.publishedAt);
+    }).finally(() => setLoading(false));
   }, [slug]);
 
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const isOwner = myDesigner?.id === (data?.id ?? "");
+
+  const handleTogglePublish = async () => {
+    if (!data) return;
+    setPublishing(true);
+    const result = await setDesignerPublished(data.id, !published);
+    if (result) setPublished(!!result.publishedAt);
+    setPublishing(false);
+  };
 
   if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><p className="type-body-md text-on-surface-variant">読み込み中...</p></div>;
 
@@ -42,18 +59,14 @@ export function PublicPortfolioPage() {
     selectedIndex !== null ? data.projects[selectedIndex] ?? null : null;
 
   const goToPrev = () => {
-    setSelectedIndex((i) =>
-      i !== null && i > 0 ? i - 1 : i
-    );
+    setSelectedIndex((i) => i !== null && i > 0 ? i - 1 : i);
   };
   const goToNext = () => {
-    setSelectedIndex((i) =>
-      i !== null && i < data.projects.length - 1 ? i + 1 : i
-    );
+    setSelectedIndex((i) => i !== null && i < data.projects.length - 1 ? i + 1 : i);
   };
 
-  // 非公開チェック
-  if (!data.publishedAt) {
+  // 非公開チェック（オーナー本人は閲覧可）
+  if (!data.publishedAt && !isOwner) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <EmptyState
@@ -73,7 +86,7 @@ export function PublicPortfolioPage() {
   );
 
   return (
-    <div className="space-y-12 sm:space-y-20 pb-24 sm:pb-28 min-h-screen relative">
+    <div className="space-y-12 sm:space-y-20 pb-16 min-h-screen relative">
       {/* Ambient lavender background */}
       <div
         className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
@@ -150,6 +163,30 @@ export function PublicPortfolioPage() {
           }}
         />
       </div>
+      {/* ── Owner Status Bar ─────────────────────────── */}
+      {isOwner && (
+        <div className="flex items-center justify-between rounded-2xl bg-surface-container-low px-5 py-3">
+          <div className="flex items-center gap-2">
+            <span className={`h-2 w-2 rounded-full shrink-0 ${published ? "bg-tertiary" : "bg-on-surface-variant/30"}`} />
+            <span className="type-label-sm text-on-surface-variant">
+              {published ? "公開中" : "非公開 — 自分だけが閲覧できます"}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={handleTogglePublish}
+            disabled={publishing}
+            className={`type-label-sm px-4 py-1.5 rounded-xl transition-colors disabled:opacity-60 ${
+              published
+                ? "bg-error/10 text-error hover:bg-error/20"
+                : "gradient-primary text-white hover:opacity-90"
+            }`}
+          >
+            {publishing ? "更新中..." : published ? "非公開にする" : "公開する"}
+          </button>
+        </div>
+      )}
+
       {/* ── Hero ─────────────────────────────────────── */}
       <section className="space-y-6 sm:space-y-8">
         <div className="flex items-start gap-4 sm:gap-8">
@@ -160,10 +197,22 @@ export function PublicPortfolioPage() {
             </AvatarFallback>
           </Avatar>
 
-          <div className="space-y-2 sm:space-y-3 min-w-0">
-            <h1 className="type-headline-lg sm:type-display-md text-on-surface">
-              {data.name}
-            </h1>
+          <div className="space-y-2 sm:space-y-3 min-w-0 flex-1">
+            <div className="flex items-center gap-3">
+              <h1 className="type-headline-lg sm:type-display-md text-on-surface">
+                {data.name}
+              </h1>
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/my/edit")}
+                  title="プロフィールを編集"
+                  className="shrink-0 flex items-center justify-center h-8 w-8 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                </button>
+              )}
+            </div>
             {currentJob && (
               <p className="type-body-md sm:type-title-lg text-on-surface-variant">
                 {currentJob.role}
@@ -200,8 +249,8 @@ export function PublicPortfolioPage() {
             {data.socialLinks && (
               <SocialLinksRow links={data.socialLinks} />
             )}
-          </div>
-        </div>
+          </div>  {/* info column */}
+        </div>  {/* flex row */}
 
         {data.bio && (
           <p className="type-body-md sm:type-body-lg text-on-surface-variant leading-relaxed">
@@ -234,45 +283,61 @@ export function PublicPortfolioPage() {
       )}
 
       {/* ── Content ──────────────────────────────────── */}
-      {data.workHistory.length === 0 && data.projects.length === 0 ? (
-        <EmptyState
-          title="コンテンツはまだありません"
-          description="オーナーがポートフォリオを追加すると表示されます。"
-        />
-      ) : (
-        <>
-          {/* ── Work History ─────────────────────────────── */}
-          {data.workHistory.length > 0 && (
-            <section className="space-y-6 sm:space-y-8">
-              <h2 className="type-headline-md sm:type-headline-lg text-on-surface">
-                経歴
-              </h2>
-              <div className="space-y-3">
-                {data.workHistory.map((w) => (
-                  <WorkHistoryRow key={w.id} item={w} />
-                ))}
-              </div>
-            </section>
+      <>
+        {/* ── Work History ─────────────────────────────── */}
+        <section className="space-y-6 sm:space-y-8">
+          <h2 className="type-headline-md sm:type-headline-lg text-on-surface">経歴</h2>
+          {data.workHistory.length > 0 ? (
+            <div className="space-y-3">
+              {data.workHistory.map((w) => (
+                <WorkHistoryRow key={w.id} item={w} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border-2 border-dashed border-outline-variant/50 p-8 text-center space-y-3">
+              <p className="type-body-md text-on-surface-variant">経歴はまだ登録されていません</p>
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/upload")}
+                  className="type-label-sm text-primary hover:underline"
+                >
+                  ポートフォリオをアップロードして追加 →
+                </button>
+              )}
+            </div>
           )}
+        </section>
 
-          {/* ── Projects ─────────────────────────────────── */}
-          {data.projects.length > 0 && (
-            <section className="space-y-6 sm:space-y-10">
-              <h2 className="type-headline-md sm:type-headline-lg text-on-surface">
-                プロジェクト
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                {data.projects.map((p, i) => (
-                  <ProjectCard
-                    key={p.id}
-                    project={p}
-                    index={i}
-                    onClick={() => setSelectedIndex(i)}
-                  />
-                ))}
-              </div>
-            </section>
+        {/* ── Projects ─────────────────────────────────── */}
+        <section className="space-y-6 sm:space-y-10">
+          <h2 className="type-headline-md sm:type-headline-lg text-on-surface">プロジェクト</h2>
+          {data.projects.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+              {data.projects.map((p, i) => (
+                <ProjectCard
+                  key={p.id}
+                  project={p}
+                  index={i}
+                  onClick={() => setSelectedIndex(i)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-2xl border-2 border-dashed border-outline-variant/50 p-12 text-center space-y-3">
+              <p className="type-body-md text-on-surface-variant">プロジェクトはまだ登録されていません</p>
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={() => navigate("/upload")}
+                  className="type-label-sm text-primary hover:underline"
+                >
+                  ポートフォリオをアップロードして追加 →
+                </button>
+              )}
+            </div>
           )}
+        </section>
 
           {/* ── Project Detail Modal ─────────────────────── */}
           <Dialog
@@ -357,8 +422,7 @@ export function PublicPortfolioPage() {
               </DialogContent>
             )}
           </Dialog>
-        </>
-      )}
+      </>
     </div>
   );
 }

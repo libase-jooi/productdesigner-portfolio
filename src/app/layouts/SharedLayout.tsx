@@ -1,6 +1,9 @@
 import { Link, Outlet, ScrollRestoration } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function SharedLayout() {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-50 glass">
@@ -12,14 +15,16 @@ export function SharedLayout() {
               className="h-5 sm:h-6 w-auto"
             />
           </Link>
-          <nav className="flex items-center gap-4">
-            <Link
-              to="/signup"
-              className="inline-flex h-8 items-center rounded-lg px-4 type-label-md text-white gradient-primary transition-all hover:opacity-90"
-            >
-              JOOiで作成
-            </Link>
-          </nav>
+          {!user && (
+            <nav className="flex items-center gap-4">
+              <Link
+                to="/signup"
+                className="inline-flex h-8 items-center rounded-lg px-4 type-label-md text-white gradient-primary transition-all hover:opacity-90"
+              >
+                JOOiで作成
+              </Link>
+            </nav>
+          )}
         </div>
       </header>
       <ScrollRestoration />

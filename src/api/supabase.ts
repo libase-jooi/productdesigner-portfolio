@@ -1,6 +1,17 @@
 import { supabase } from "@/lib/supabase";
 import type { Designer, DesignerWithRelations, Project, WorkHistory } from "./schema";
 
+function generateSlug(name: string): string {
+  const base = name
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\x00-\x7F]/g, "")
+    .replace(/[^a-z0-9-]/g, "")
+    .replace(/^-+|-+$/g, "");
+  const suffix = Math.random().toString(36).slice(2, 8);
+  return base ? `${base}-${suffix}` : `designer-${suffix}`;
+}
+
 // ─── Row mappers (snake_case DB → camelCase TypeScript) ──────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -128,10 +139,25 @@ export async function getDesignerById(id: string): Promise<DesignerWithRelations
   };
 }
 
+export async function uploadProfileImage(
+  file: File,
+  userId: string
+): Promise<string | null> {
+  const ext = file.name.split(".").pop();
+  const path = `${userId}.${ext}`;
+  const { error } = await supabase.storage
+    .from("avatars")
+    .upload(path, file, { upsert: true });
+  if (error) return null;
+  const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 export async function updateDesigner(
   id: string,
   fields: {
     name?: string;
+    slug?: string;
     status?: string;
     sourceUrl?: string | null;
     sourceType?: string | null;
@@ -144,6 +170,7 @@ export async function updateDesigner(
 ): Promise<Designer | null> {
   const row: Record<string, unknown> = {};
   if (fields.name !== undefined) row.name = fields.name;
+  if (fields.slug !== undefined) row.slug = fields.slug;
   if (fields.status !== undefined) row.status = fields.status;
   if (fields.sourceUrl !== undefined) row.source_url = fields.sourceUrl;
   if (fields.sourceType !== undefined) row.source_type = fields.sourceType;
@@ -185,13 +212,28 @@ export async function createDesigner(
   name: string,
   authUserId: string
 ): Promise<Designer | null> {
+  const slug = generateSlug(name);
   const { data, error } = await supabase
     .from("designers")
-    .insert({ name, auth_user_id: authUserId })
+    .insert({ name, auth_user_id: authUserId, slug })
     .select()
     .single();
   if (error) return null;
   if (!data) return null;
+  return mapDesigner(data);
+}
+
+export async function setDesignerPublished(
+  id: string,
+  publish: boolean
+): Promise<Designer | null> {
+  const { data, error } = await supabase
+    .from("designers")
+    .update({ published_at: publish ? new Date().toISOString() : null })
+    .eq("id", id)
+    .select()
+    .single();
+  if (error || !data) return null;
   return mapDesigner(data);
 }
 
