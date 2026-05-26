@@ -1,8 +1,9 @@
-import { Link, Outlet, ScrollRestoration } from "react-router-dom";
+import { Link, Outlet, ScrollRestoration, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 export function SharedLayout() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen">
@@ -15,16 +16,24 @@ export function SharedLayout() {
               className="h-5 sm:h-6 w-auto"
             />
           </Link>
-          {!user && (
-            <nav className="flex items-center gap-4">
+          <nav className="flex items-center gap-3">
+            {user ? (
+              <button
+                type="button"
+                onClick={async () => { await signOut(); navigate("/login"); }}
+                className="type-label-sm text-on-surface-variant/50 hover:text-error transition-colors"
+              >
+                ログアウト
+              </button>
+            ) : (
               <Link
                 to="/signup"
                 className="inline-flex h-8 items-center rounded-lg px-4 type-label-md text-white gradient-primary transition-all hover:opacity-90"
               >
                 JOOiで作成
               </Link>
-            </nav>
-          )}
+            )}
+          </nav>
         </div>
       </header>
       <ScrollRestoration />

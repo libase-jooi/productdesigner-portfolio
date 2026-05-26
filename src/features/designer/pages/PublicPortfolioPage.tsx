@@ -273,14 +273,25 @@ export function PublicPortfolioPage() {
       </section>
 
       {/* ── Skill Radar Chart ─────────────────────────── */}
-      {data.skillScores && (
-        <section className="rounded-2xl border border-outline-variant bg-surface-container-low p-6 sm:p-8 space-y-6 sm:space-y-8">
-          <h2 className="type-headline-md sm:type-headline-lg text-on-surface">
-            スキル診断
-          </h2>
+      <section className="rounded-2xl border border-outline-variant bg-surface-container-low p-6 sm:p-8 space-y-6 sm:space-y-8">
+        <h2 className="type-headline-md sm:type-headline-lg text-on-surface">スキル診断</h2>
+        {data.skillScores ? (
           <SkillRadarChart scores={data.skillScores} subSkillScores={data.subSkillScores} />
-        </section>
-      )}
+        ) : (
+          <div className="rounded-xl border-2 border-dashed border-outline-variant/50 p-8 text-center space-y-3">
+            <p className="type-body-md text-on-surface-variant">スキル診断はまだ登録されていません</p>
+            {isOwner && (
+              <button
+                type="button"
+                onClick={() => navigate("/upload")}
+                className="type-label-sm text-primary hover:underline"
+              >
+                ポートフォリオをアップロードして診断 →
+              </button>
+            )}
+          </div>
+        )}
+      </section>
 
       {/* ── Content ──────────────────────────────────── */}
       <>

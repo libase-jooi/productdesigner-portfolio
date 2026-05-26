@@ -26,7 +26,7 @@ export function SignupPage() {
       setError("登録に失敗しました。入力内容を確認してください");
       return;
     }
-    navigate("/upload");
+    navigate("/my/edit", { state: { firstTime: true } });
   };
 
   return (

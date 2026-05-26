@@ -18,12 +18,16 @@ export function UploadPage() {
   const canSubmit =
     (method === "pdf" && file !== null) || (method === "url" && url.trim() !== "");
 
+  const isFirstTime =
+    myDesigner !== null &&
+    (!myDesigner.name || !myDesigner.bio || !myDesigner.availabilityStatus);
+
   const handleSubmit = () => {
     if (!canSubmit) return;
     const sourceType = method === "pdf" ? "pdf" : "url";
     const sourceName = method === "pdf" ? file!.name : url;
     navigate("/upload/processing", {
-      state: { sourceType, sourceName },
+      state: { sourceType, sourceName, file: method === "pdf" ? file : null, url: method === "url" ? url : null },
     });
   };
 
@@ -216,13 +220,13 @@ export function UploadPage() {
 
       {/* Submit */}
       <div className="flex items-center justify-between">
-        {myDesigner ? (
+        {isFirstTime ? (
           <button
             type="button"
             onClick={() => navigate("/my/edit")}
             className="type-label-sm text-on-surface-variant hover:text-on-surface transition-colors"
           >
-            ← プロフィールを編集する
+            スキップ →
           </button>
         ) : (
           <div />
