@@ -219,7 +219,7 @@ export function UploadPage() {
         {myDesigner ? (
           <button
             type="button"
-            onClick={() => navigate(`/admin/designers/${myDesigner.id}`)}
+            onClick={() => navigate("/my/edit")}
             className="type-label-sm text-on-surface-variant hover:text-on-surface transition-colors"
           >
             ← プロフィールを編集する

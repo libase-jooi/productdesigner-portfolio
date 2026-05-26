@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import {
   getDesignerByAuthUserId,
   createDesigner,
+  updateDesigner,
 } from "@/api/supabase";
 import type { DesignerWithRelations } from "@/api/schema";
 
@@ -26,7 +27,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [myDesigner, setMyDesigner] = useState<DesignerWithRelations | null>(null);
 
   const loadMyDesigner = async (userId: string) => {
-    const designer = await getDesignerByAuthUserId(userId);
+    let designer = await getDesignerByAuthUserId(userId);
+    if (designer && !designer.slug) {
+      const base = designer.name.toLowerCase().replace(/\s+/g, "-").replace(/[^\x00-\x7F]/g, "").replace(/[^a-z0-9-]/g, "").replace(/^-+|-+$/g, "");
+      const suffix = Math.random().toString(36).slice(2, 8);
+      const slug = base ? `${base}-${suffix}` : `designer-${suffix}`;
+      const updated = await updateDesigner(designer.id, { slug });
+      if (updated) designer = { ...designer, slug: updated.slug };
+    }
     setMyDesigner(designer);
   };
 

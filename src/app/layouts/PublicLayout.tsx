@@ -13,7 +13,7 @@ function designerUrl(d: { id: string; slug: string | null }) {
 export function PublicLayout() {
   const navigate = useNavigate();
   const { designer, allDesigners, switchDesigner } = useCurrentDesigner();
-  const { signOut } = useAuth();
+  const { signOut, myDesigner } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const onboardingOpen = searchParams.has("guide");
@@ -74,6 +74,12 @@ export function PublicLayout() {
               className="type-label-sm text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
             >
               Admin
+            </Link>
+            <Link
+              to={myDesigner?.slug ? `/p/${myDesigner.slug}` : "/my/edit"}
+              className="type-label-sm text-on-surface-variant/50 hover:text-on-surface-variant transition-colors"
+            >
+              マイページ
             </Link>
             <button
               onClick={async () => { await signOut(); navigate("/login"); }}
