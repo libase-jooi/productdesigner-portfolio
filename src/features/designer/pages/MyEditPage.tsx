@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,8 @@ function initDraft(d: DesignerWithRelations): Draft {
 
 export function MyEditPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isFirstTime = (location.state as { firstTime?: boolean })?.firstTime === true;
   const { myDesigner, loading: authLoading } = useAuth();
   const [designer, setDesigner] = useState<DesignerWithRelations | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -67,7 +69,7 @@ export function MyEditPage() {
     }).finally(() => setLoading(false));
   }, [myDesigner, authLoading, navigate]);
 
-  const handleSave = async () => {
+  const handleSave = async (redirect = true) => {
     if (!draft || !myDesigner) return;
     setSaving(true);
     const socialLinks = Object.fromEntries(
@@ -82,8 +84,17 @@ export function MyEditPage() {
       socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : null,
     });
     setSaving(false);
-    setSaveMsg(result ? "success" : "error");
-    setTimeout(() => setSaveMsg(null), 3000);
+    if (result) {
+      if (redirect && designer.slug) {
+        navigate(`/p/${designer.slug}`);
+      } else {
+        setSaveMsg("success");
+        setTimeout(() => setSaveMsg(null), 3000);
+      }
+    } else {
+      setSaveMsg("error");
+      setTimeout(() => setSaveMsg(null), 3000);
+    }
   };
 
   if (loading) return <div className="p-8 text-on-surface-variant">読み込み中...</div>;
@@ -165,7 +176,10 @@ export function MyEditPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="type-label-sm text-on-surface-variant block">氏名</label>
+          <label className="type-label-sm text-on-surface-variant flex items-center gap-1.5">
+            氏名
+            <span className="type-label-sm text-error">必須</span>
+          </label>
           <Input
             value={draft.name}
             onChange={(e) => set("name", e.target.value)}
@@ -174,7 +188,10 @@ export function MyEditPage() {
         </div>
 
         <div className="space-y-1.5">
-          <label className="type-label-sm text-on-surface-variant block">自己紹介</label>
+          <label className="type-label-sm text-on-surface-variant flex items-center gap-1.5">
+            自己紹介
+            <span className="type-label-sm text-error">必須</span>
+          </label>
           <Textarea
             value={draft.bio}
             onChange={(e) => set("bio", e.target.value)}
@@ -189,7 +206,10 @@ export function MyEditPage() {
         <h2 className="type-title-md text-on-surface">稼働状況</h2>
 
         <div className="space-y-1.5">
-          <label className="type-label-sm text-on-surface-variant block">ステータス</label>
+          <label className="type-label-sm text-on-surface-variant flex items-center gap-1.5">
+            ステータス
+            <span className="type-label-sm text-error">必須</span>
+          </label>
           <select
             value={draft.availabilityStatus}
             onChange={(e) => set("availabilityStatus", e.target.value)}
@@ -253,25 +273,37 @@ export function MyEditPage() {
 
       {/* Floating Save Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-40 glass border-t border-outline-variant/30">
-        <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-end gap-3">
-          {saveMsg === "success" && (
-            <span className="type-label-sm text-tertiary">保存しました</span>
-          )}
-          {saveMsg === "error" && (
-            <span className="type-label-sm text-error">保存に失敗しました</span>
-          )}
-          {designer.slug && (
-            <a href={`/p/${designer.slug}`} target="_blank" className="type-label-sm text-on-surface-variant hover:text-primary transition-colors">
-              公開ページを確認 →
-            </a>
-          )}
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="gradient-primary text-on-primary rounded-2xl px-6 disabled:opacity-60"
-          >
-            {saving ? "保存中..." : "保存"}
-          </Button>
+        <div className="max-w-2xl mx-auto px-6 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            {saveMsg === "success" && (
+              <span className="type-label-sm text-tertiary">保存しました</span>
+            )}
+            {saveMsg === "error" && (
+              <span className="type-label-sm text-error">保存に失敗しました</span>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={() => handleSave(true)}
+              disabled={saving}
+              variant="outline"
+              className="rounded-2xl px-6 disabled:opacity-60 bg-white"
+            >
+              {saving ? "保存中..." : "保存"}
+            </Button>
+            {isFirstTime && draft.name && draft.bio && draft.availabilityStatus && (
+              <Button
+                onClick={async () => {
+                  await handleSave(false);
+                  navigate("/upload");
+                }}
+                disabled={saving}
+                className="gradient-primary text-on-primary rounded-2xl px-6 disabled:opacity-60"
+              >
+                ポートフォリオをアップロード →
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
