@@ -70,7 +70,7 @@ export function MyEditPage() {
   }, [myDesigner, authLoading, navigate]);
 
   const handleSave = async (redirect = true) => {
-    if (!draft || !myDesigner) return;
+    if (!draft || !myDesigner || !designer) return;
     setSaving(true);
     const socialLinks = Object.fromEntries(
       Object.entries(draft.socialLinks).filter(([, v]) => v !== "")
