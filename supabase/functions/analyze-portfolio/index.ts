@@ -108,17 +108,14 @@ Deno.serve(async (req) => {
     const { type, content, url, designerId } = await req.json();
 
     // Verify ownership
-    const { data: designerCheck, error: designerCheckError } = await adminClient
+    const { data: designerCheck } = await adminClient
       .from("designers")
       .select("id, slug")
       .eq("id", designerId)
       .eq("auth_user_id", user.id)
       .single();
     if (!designerCheck) {
-      return new Response(JSON.stringify({
-        error: "Designer not found or not owned by user",
-        debug: { designerId, userId: user.id, dbError: designerCheckError?.message }
-      }), {
+      return new Response(JSON.stringify({ error: "Designer not found or not owned by user" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -261,10 +258,9 @@ Deno.serve(async (req) => {
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    const detail = err instanceof Error ? err.stack : JSON.stringify(err);
+    const message = err instanceof Error ? err.message : "Unknown error";
     return new Response(
-      JSON.stringify({ error: message, detail }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

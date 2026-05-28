@@ -251,6 +251,69 @@ export async function analyzePortfolio(params: {
   return { slug: data.slug };
 }
 
+export async function uploadProjectThumbnail(
+  file: File,
+  projectId: string
+): Promise<string | null> {
+  const ext = file.name.split(".").pop();
+  const path = `${projectId}.${ext}`;
+  const { error } = await supabase.storage
+    .from("thumbnails")
+    .upload(path, file, { upsert: true });
+  if (error) return null;
+  const { data } = supabase.storage.from("thumbnails").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+export async function updateProject(
+  id: string,
+  fields: {
+    thumbnailUrl?: string | null;
+    title?: string;
+    overview?: string | null;
+    period?: string | null;
+    team?: string | null;
+    role?: string | null;
+    background?: string | null;
+    issues?: string[];
+    approach?: string[];
+    keyDecisions?: string[];
+    outputs?: string | null;
+    results?: string | null;
+    metrics?: string[];
+    domainTags?: string[];
+    phaseTags?: string[];
+    skillTags?: string[];
+  }
+): Promise<Project | null> {
+  const row: Record<string, unknown> = {};
+  if (fields.thumbnailUrl !== undefined) row.thumbnail_url = fields.thumbnailUrl;
+  if (fields.title !== undefined) row.title = fields.title;
+  if (fields.overview !== undefined) row.overview = fields.overview;
+  if (fields.period !== undefined) row.period = fields.period;
+  if (fields.team !== undefined) row.team = fields.team;
+  if (fields.role !== undefined) row.role = fields.role;
+  if (fields.background !== undefined) row.background = fields.background;
+  if (fields.issues !== undefined) row.issues = fields.issues;
+  if (fields.approach !== undefined) row.approach = fields.approach;
+  if (fields.keyDecisions !== undefined) row.key_decisions = fields.keyDecisions;
+  if (fields.outputs !== undefined) row.outputs = fields.outputs;
+  if (fields.results !== undefined) row.results = fields.results;
+  if (fields.metrics !== undefined) row.metrics = fields.metrics;
+  if (fields.domainTags !== undefined) row.domain_tags = fields.domainTags;
+  if (fields.phaseTags !== undefined) row.phase_tags = fields.phaseTags;
+  if (fields.skillTags !== undefined) row.skill_tags = fields.skillTags;
+
+  const { data, error } = await supabase
+    .from("projects")
+    .update(row)
+    .eq("id", id)
+    .select()
+    .single();
+  if (error || !data) return null;
+  return mapProject(data);
+}
+
 export async function getProjectById(
   id: string
 ): Promise<{ project: Project; designer: DesignerWithRelations } | null> {
