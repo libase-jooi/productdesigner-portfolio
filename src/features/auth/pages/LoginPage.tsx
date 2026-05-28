@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { getDesignerByAuthUserId } from "@/api/supabase";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -20,7 +22,17 @@ export function LoginPage() {
       setError("メールアドレスまたはパスワードが正しくありません");
       return;
     }
-    navigate("/upload");
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    if (authUser) {
+      const designer = await getDesignerByAuthUserId(authUser.id);
+      if (designer?.slug) {
+        navigate(`/p/${designer.slug}`);
+      } else {
+        navigate("/upload");
+      }
+    } else {
+      navigate("/upload");
+    }
   };
 
   return (

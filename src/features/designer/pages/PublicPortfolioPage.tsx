@@ -10,9 +10,72 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { getDesignerBySlug, setDesignerPublished } from "@/api/supabase";
+import { getDesignerBySlug, setDesignerPublished, updateProject, uploadProjectThumbnail } from "@/api/supabase";
 import type { DesignerWithRelations, Project, WorkHistory, SocialLinks, SkillScores, SubSkillScores } from "@/api/schema";
 import { useAuth } from "@/contexts/AuthContext";
+
+interface ProjectEditDraft {
+  thumbnailUrl: string;
+  title: string;
+  overview: string;
+  period: string;
+  team: string;
+  role: string;
+  background: string;
+  issues: string;
+  approach: string;
+  keyDecisions: string;
+  outputs: string;
+  results: string;
+  metrics: string;
+  domainTags: string;
+  phaseTags: string;
+  skillTags: string;
+}
+
+function projectToDraft(p: Project): ProjectEditDraft {
+  return {
+    thumbnailUrl: p.thumbnailUrl ?? "",
+    title: p.title,
+    overview: p.overview ?? "",
+    period: p.period ?? "",
+    team: p.team ?? "",
+    role: p.role ?? "",
+    background: p.background ?? "",
+    issues: p.issues.join("\n"),
+    approach: p.approach.join("\n"),
+    keyDecisions: p.keyDecisions.join("\n"),
+    outputs: p.outputs ?? "",
+    results: p.results ?? "",
+    metrics: p.metrics.join("\n"),
+    domainTags: p.domainTags.join(", "),
+    phaseTags: p.phaseTags.join(", "),
+    skillTags: p.skillTags.join(", "),
+  };
+}
+
+function draftToFields(draft: ProjectEditDraft) {
+  const splitLines = (s: string) => s.split("\n").map((l) => l.trim()).filter(Boolean);
+  const splitCommas = (s: string) => s.split(",").map((l) => l.trim()).filter(Boolean);
+  return {
+    thumbnailUrl: draft.thumbnailUrl || null,
+    title: draft.title.trim() || undefined,
+    overview: draft.overview.trim() || null,
+    period: draft.period.trim() || null,
+    team: draft.team.trim() || null,
+    role: draft.role.trim() || null,
+    background: draft.background.trim() || null,
+    issues: splitLines(draft.issues),
+    approach: splitLines(draft.approach),
+    keyDecisions: splitLines(draft.keyDecisions),
+    outputs: draft.outputs.trim() || null,
+    results: draft.results.trim() || null,
+    metrics: splitLines(draft.metrics),
+    domainTags: splitCommas(draft.domainTags),
+    phaseTags: splitCommas(draft.phaseTags),
+    skillTags: splitCommas(draft.skillTags),
+  };
+}
 
 export function PublicPortfolioPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -23,6 +86,10 @@ export function PublicPortfolioPage() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [published, setPublished] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editDraft, setEditDraft] = useState<ProjectEditDraft | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -33,6 +100,43 @@ export function PublicPortfolioPage() {
   }, [slug]);
 
   const isOwner = myDesigner?.id === (data?.id ?? "");
+
+  const handleThumbnailFile = async (file: File) => {
+    if (!selectedProject) return;
+    setUploadingThumbnail(true);
+    const url = await uploadProjectThumbnail(file, selectedProject.id);
+    if (url) {
+      setEditDraft((prev) => prev ? { ...prev, thumbnailUrl: url } : prev);
+    }
+    setUploadingThumbnail(false);
+  };
+
+  const handleStartEdit = () => {
+    if (!selectedProject) return;
+    setEditDraft(projectToDraft(selectedProject));
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditDraft(null);
+  };
+
+  const handleSave = async () => {
+    if (!editDraft || !selectedProject) return;
+    setSaving(true);
+    const updated = await updateProject(selectedProject.id, draftToFields(editDraft));
+    if (updated) {
+      setData((prev) =>
+        prev
+          ? { ...prev, projects: prev.projects.map((p) => (p.id === updated.id ? updated : p)) }
+          : prev
+      );
+      setIsEditing(false);
+      setEditDraft(null);
+    }
+    setSaving(false);
+  };
 
   const handleTogglePublish = async () => {
     if (!data) return;
@@ -59,9 +163,13 @@ export function PublicPortfolioPage() {
     selectedIndex !== null ? data.projects[selectedIndex] ?? null : null;
 
   const goToPrev = () => {
+    setIsEditing(false);
+    setEditDraft(null);
     setSelectedIndex((i) => i !== null && i > 0 ? i - 1 : i);
   };
   const goToNext = () => {
+    setIsEditing(false);
+    setEditDraft(null);
     setSelectedIndex((i) => i !== null && i < data.projects.length - 1 ? i + 1 : i);
   };
 
@@ -165,25 +273,50 @@ export function PublicPortfolioPage() {
       </div>
       {/* ── Owner Status Bar ─────────────────────────── */}
       {isOwner && (
-        <div className="flex items-center justify-between rounded-2xl bg-surface-container-low px-5 py-3">
-          <div className="flex items-center gap-2">
-            <span className={`h-2 w-2 rounded-full shrink-0 ${published ? "bg-tertiary" : "bg-on-surface-variant/30"}`} />
-            <span className="type-label-sm text-on-surface-variant">
-              {published ? "公開中" : "非公開 — 自分だけが閲覧できます"}
-            </span>
+        <div className="rounded-2xl bg-surface-container-low px-5 py-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className={`h-2 w-2 rounded-full shrink-0 ${published ? "bg-tertiary" : "bg-on-surface-variant/30"}`} />
+              <span className="type-label-sm text-on-surface-variant">
+                {published ? "公開中" : "非公開 — 自分だけが閲覧できます"}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleTogglePublish}
+              disabled={publishing}
+              className={`type-label-sm px-4 py-1.5 rounded-xl transition-colors disabled:opacity-60 ${
+                published
+                  ? "bg-error/10 text-error hover:bg-error/20"
+                  : "gradient-primary text-white hover:opacity-90"
+              }`}
+            >
+              {publishing ? "更新中..." : published ? "非公開にする" : "公開する"}
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={handleTogglePublish}
-            disabled={publishing}
-            className={`type-label-sm px-4 py-1.5 rounded-xl transition-colors disabled:opacity-60 ${
-              published
-                ? "bg-error/10 text-error hover:bg-error/20"
-                : "gradient-primary text-white hover:opacity-90"
-            }`}
-          >
-            {publishing ? "更新中..." : published ? "非公開にする" : "公開する"}
-          </button>
+          {data.slug && (
+            <div className="flex items-center gap-2">
+              <span className="type-label-sm text-on-surface-variant/60">公開URL:</span>
+              <a
+                href={`${window.location.origin}/p/${data.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="type-label-sm text-primary hover:underline truncate"
+              >
+                {window.location.origin}/p/{data.slug}
+              </a>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/p/${data.slug}`)}
+                title="URLをコピー"
+                className="shrink-0 text-on-surface-variant hover:text-on-surface transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -354,80 +487,116 @@ export function PublicPortfolioPage() {
           <Dialog
             open={selectedProject !== null}
             onOpenChange={(open) => {
-              if (!open) setSelectedIndex(null);
+              if (!open) {
+                setSelectedIndex(null);
+                setIsEditing(false);
+                setEditDraft(null);
+              }
             }}
           >
             {selectedProject && selectedIndex !== null && (
               <DialogContent className="sm:max-w-5xl max-h-[85vh] flex flex-col p-0">
                 <DialogHeader className="shrink-0 p-4 sm:p-6 pb-0 sm:pb-0 pr-12">
-                  <DialogTitle className="type-headline-sm sm:type-headline-lg text-on-surface">
-                    {selectedProject.title}
-                  </DialogTitle>
-                  {selectedProject.overview && (
-                    <DialogDescription className="type-body-sm sm:type-body-md text-on-surface-variant">
-                      {selectedProject.overview}
-                    </DialogDescription>
+                  {isEditing ? (
+                    <DialogTitle className="type-headline-sm sm:type-headline-lg text-on-surface">
+                      プロジェクトを編集
+                    </DialogTitle>
+                  ) : (
+                    <>
+                      <DialogTitle className="type-headline-sm sm:type-headline-lg text-on-surface">
+                        {selectedProject.title}
+                      </DialogTitle>
+                      {selectedProject.overview && (
+                        <DialogDescription className="type-body-sm sm:type-body-md text-on-surface-variant">
+                          {selectedProject.overview}
+                        </DialogDescription>
+                      )}
+                    </>
                   )}
                 </DialogHeader>
+
+                {isOwner && !isEditing && (
+                  <div className="shrink-0 px-4 sm:px-6 pt-3 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleStartEdit}
+                      className="flex items-center gap-1.5 type-label-sm text-on-surface-variant hover:text-primary transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                      </svg>
+                      編集
+                    </button>
+                  </div>
+                )}
+
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 pt-4">
-                  <ProjectModalBody project={selectedProject} />
+                  {isEditing && editDraft ? (
+                    <ProjectEditForm
+                      draft={editDraft}
+                      onChange={setEditDraft}
+                      onThumbnailFileSelect={handleThumbnailFile}
+                      thumbnailUploading={uploadingThumbnail}
+                    />
+                  ) : (
+                    <ProjectModalBody project={selectedProject} />
+                  )}
                 </div>
 
-                {/* ── Prev / Next Navigation (sticky footer) ── */}
-                {data.projects.length > 1 && (
+                {/* ── Footer: save/cancel when editing, prev/next when viewing ── */}
+                {(isEditing || data.projects.length > 1) && (
                   <div
                     className="shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 border-t"
-                    style={{
-                      borderColor: "var(--surface-container-high)",
-                    }}
+                    style={{ borderColor: "var(--surface-container-high)" }}
                   >
-                    <button
-                      type="button"
-                      onClick={goToPrev}
-                      disabled={selectedIndex === 0}
-                      className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="m15 18-6-6 6-6" />
-                      </svg>
-                      前へ
-                    </button>
-
-                    <span className="type-label-sm text-on-surface-variant">
-                      {selectedIndex + 1} / {data.projects.length}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={goToNext}
-                      disabled={selectedIndex === data.projects.length - 1}
-                      className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
-                    >
-                      次へ
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="m9 18 6-6-6-6" />
-                      </svg>
-                    </button>
+                    {isEditing ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleCancelEdit}
+                          disabled={saving}
+                          className="type-label-lg text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-40"
+                        >
+                          キャンセル
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSave}
+                          disabled={saving}
+                          className="type-label-lg px-4 py-1.5 rounded-xl gradient-primary text-white hover:opacity-90 disabled:opacity-60 transition-opacity"
+                        >
+                          {saving ? "保存中..." : "保存する"}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={goToPrev}
+                          disabled={selectedIndex === 0}
+                          className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="m15 18-6-6 6-6" />
+                          </svg>
+                          前へ
+                        </button>
+                        <span className="type-label-sm text-on-surface-variant">
+                          {selectedIndex + 1} / {data.projects.length}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={goToNext}
+                          disabled={selectedIndex === data.projects.length - 1}
+                          className="flex items-center gap-2 type-label-lg text-primary disabled:text-on-surface-variant/40 disabled:cursor-not-allowed transition-colors hover:text-primary/80"
+                        >
+                          次へ
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="m9 18 6-6-6-6" />
+                          </svg>
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </DialogContent>
@@ -515,15 +684,23 @@ function ProjectCard({
             : "bg-surface-container-low elevation-1"
         }`}
       >
-        {p.thumbnailUrl && (
-          <div className="aspect-[16/9] overflow-hidden">
+        <div className="aspect-[16/9] overflow-hidden">
+          {p.thumbnailUrl ? (
             <img
               src={p.thumbnailUrl}
               alt={p.title}
               className="w-full h-full object-cover"
             />
-          </div>
-        )}
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-surface-container-high">
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-on-surface-variant/25">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                <circle cx="9" cy="9" r="2"/>
+                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+              </svg>
+            </div>
+          )}
+        </div>
 
         <div className="p-3 sm:p-8">
           <div className="sm:flex sm:items-start sm:justify-between sm:gap-4 mb-2 sm:mb-6">
@@ -858,6 +1035,159 @@ function ProjectModalBody({ project: p }: { project: Project }) {
           <p className="type-body-md text-on-surface italic">"{p.quote}"</p>
         </blockquote>
       )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Project Edit Form
+   ═══════════════════════════════════════════════════════════════ */
+
+const EDIT_INPUT = "w-full rounded-lg bg-surface-container-low border border-outline-variant px-3 py-2 type-body-sm text-on-surface focus:outline-none focus:border-primary placeholder:text-on-surface-variant/40";
+const EDIT_TEXTAREA = `${EDIT_INPUT} resize-none`;
+
+function ProjectEditForm({
+  draft,
+  onChange,
+  onThumbnailFileSelect,
+  thumbnailUploading,
+}: {
+  draft: ProjectEditDraft;
+  onChange: (d: ProjectEditDraft) => void;
+  onThumbnailFileSelect: (file: File) => void;
+  thumbnailUploading: boolean;
+}) {
+  const set =
+    (key: keyof ProjectEditDraft) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      onChange({ ...draft, [key]: e.target.value });
+
+  return (
+    <div className="space-y-5 pt-2">
+      {/* サムネイル */}
+      <div className="space-y-2">
+        <label className="block type-label-md text-on-surface">サムネイル</label>
+        {draft.thumbnailUrl && (
+          <div className="rounded-xl overflow-hidden aspect-[16/9] max-h-48 bg-surface-container">
+            <img src={draft.thumbnailUrl} alt="thumbnail" className="w-full h-full object-cover" />
+          </div>
+        )}
+        <label className={`inline-flex items-center gap-1.5 type-label-sm cursor-pointer transition-colors ${
+          thumbnailUploading ? "text-on-surface-variant/50 cursor-not-allowed" : "text-primary hover:text-primary/80"
+        }`}>
+          <input
+            type="file"
+            accept="image/*"
+            className="sr-only"
+            disabled={thumbnailUploading}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) onThumbnailFileSelect(file);
+              e.currentTarget.value = "";
+            }}
+          />
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
+          </svg>
+          {thumbnailUploading ? "アップロード中..." : draft.thumbnailUrl ? "画像を変更" : "画像をアップロード"}
+        </label>
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="block type-label-md text-on-surface">タイトル</label>
+        <input value={draft.title} onChange={set("title")} className={EDIT_INPUT} />
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="block type-label-md text-on-surface">概要</label>
+        <textarea value={draft.overview} onChange={set("overview")} rows={2} className={EDIT_TEXTAREA} />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="space-y-1.5">
+          <label className="block type-label-md text-on-surface">期間</label>
+          <input value={draft.period} onChange={set("period")} placeholder="例: 2023年4月〜2024年3月" className={EDIT_INPUT} />
+        </div>
+        <div className="space-y-1.5">
+          <label className="block type-label-md text-on-surface">役割</label>
+          <input value={draft.role} onChange={set("role")} className={EDIT_INPUT} />
+        </div>
+        <div className="space-y-1.5">
+          <label className="block type-label-md text-on-surface">チーム</label>
+          <input value={draft.team} onChange={set("team")} className={EDIT_INPUT} />
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="block type-label-md text-on-surface">背景・課題</label>
+        <textarea value={draft.background} onChange={set("background")} rows={3} className={EDIT_TEXTAREA} />
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="block type-label-md text-on-surface">
+          課題リスト{" "}
+          <span className="type-body-sm text-on-surface-variant font-normal">（1行1項目）</span>
+        </label>
+        <textarea value={draft.issues} onChange={set("issues")} rows={3} className={EDIT_TEXTAREA} />
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="block type-label-md text-on-surface">
+          アプローチ{" "}
+          <span className="type-body-sm text-on-surface-variant font-normal">（1行1項目）</span>
+        </label>
+        <textarea value={draft.approach} onChange={set("approach")} rows={3} className={EDIT_TEXTAREA} />
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="block type-label-md text-on-surface">
+          主要な判断{" "}
+          <span className="type-body-sm text-on-surface-variant font-normal">（1行1項目）</span>
+        </label>
+        <textarea value={draft.keyDecisions} onChange={set("keyDecisions")} rows={3} className={EDIT_TEXTAREA} />
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="block type-label-md text-on-surface">成果物</label>
+        <textarea value={draft.outputs} onChange={set("outputs")} rows={2} className={EDIT_TEXTAREA} />
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="block type-label-md text-on-surface">結果・成果</label>
+        <textarea value={draft.results} onChange={set("results")} rows={2} className={EDIT_TEXTAREA} />
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="block type-label-md text-on-surface">
+          指標{" "}
+          <span className="type-body-sm text-on-surface-variant font-normal">（1行1項目、例: CVR: +15%）</span>
+        </label>
+        <textarea value={draft.metrics} onChange={set("metrics")} rows={2} className={EDIT_TEXTAREA} />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="space-y-1.5">
+          <label className="block type-label-md text-on-surface">
+            ドメインタグ{" "}
+            <span className="type-body-sm text-on-surface-variant font-normal">（カンマ区切り）</span>
+          </label>
+          <input value={draft.domainTags} onChange={set("domainTags")} className={EDIT_INPUT} />
+        </div>
+        <div className="space-y-1.5">
+          <label className="block type-label-md text-on-surface">
+            フェーズタグ{" "}
+            <span className="type-body-sm text-on-surface-variant font-normal">（カンマ区切り）</span>
+          </label>
+          <input value={draft.phaseTags} onChange={set("phaseTags")} className={EDIT_INPUT} />
+        </div>
+        <div className="space-y-1.5">
+          <label className="block type-label-md text-on-surface">
+            スキルタグ{" "}
+            <span className="type-body-sm text-on-surface-variant font-normal">（カンマ区切り）</span>
+          </label>
+          <input value={draft.skillTags} onChange={set("skillTags")} className={EDIT_INPUT} />
+        </div>
+      </div>
     </div>
   );
 }
